@@ -1,0 +1,64 @@
+# 营养不良筛查与健康管理小程序 - Git忽略文件
+
+# ========== 通用 ==========
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
+
+# ========== IDE ==========
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ========== Node.js ==========
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ========== uni-app ==========
+/dist/
+/unpackage/
+.hbuilderx/
+
+# ========== Python ==========
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+.env
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ========== 项目特定 ==========
+# 用户上传文件
+uploads/
+!uploads/.gitkeep
+
+# 本地配置
+.env.local
+.env.*.local
+config.local.py
+
+# 测试覆盖率
+coverage/
+
+# 构建产物
+*.min.js
+*.min.css
+

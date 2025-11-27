@@ -1,0 +1,25 @@
+# 营养不良筛查与健康管理小程序 - 编辑器配置
+
+root = true
+
+# 所有文件默认配置
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python 文件
+[*.py]
+indent_size = 4
+
+# Markdown 文件
+[*.md]
+trim_trailing_whitespace = false
+
+# SQL 文件
+[*.sql]
+indent_size = 4
+

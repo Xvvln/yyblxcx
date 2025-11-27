@@ -1,0 +1,464 @@
+# 营养不良筛查与健康管理小程序 - 项目开发规则
+
+## 项目概述
+
+这是一个基于 uni-app + Vue 3 的健康管理微信小程序项目，配套 Python FastAPI 后端和 Vue 3 Web 管理端。
+
+---
+
+## 开发流程规范（必须遵守）
+
+### 每一步执行前，必须先查看相关文档！
+
+**开发任何功能前**，按以下顺序检查：
+
+1. **查看需求文档**
+   - `docs/04-功能模块设计.md` - 确认功能点和数据流
+   - `docs/03-用户需求分析.md` - 确认用户角色和权限
+
+2. **查看约束文档**
+   - `docs/00-开发约束与说明.md` - 确认是否有暂缓功能
+   - 本文件的「强制规则」部分
+
+3. **查看技术文档**
+   - `docs/08-技术栈与架构.md` - 确认代码风格和组件用法
+   - `docs/09-API接口规范.md` - 确认接口路径和参数
+
+4. **查看设计文档**
+   - `docs/06-界面设计规范.md` - 确认 UI 规范
+   - `design-references/` - 参考 Keep 风格
+
+### 按模块开发时的检查清单
+
+| 开发内容 | 必须先查看 |
+|---------|-----------|
+| 新页面 | 06-界面设计规范 + 04-功能模块设计 |
+| 新接口 | 09-API接口规范 + 数据库设计 |
+| 新组件 | 08-技术栈与架构（组件库用法） |
+| 任何代码 | 00-开发约束与说明（禁用Emoji、占位图等） |
+
+### 不确定时使用 MCP 工具
+
+- **技术问题** → 调用 Context7 MCP 查询最新文档
+- **数据问题** → 调用 MySQL MCP 查询表结构
+- **需求问题** → 阅读 `docs/` 目录下对应文档
+
+---
+
+## 必读文档索引
+
+| 文档 | 内容 | 何时查看 |
+|-----|------|---------|
+| `docs/00-开发约束与说明.md` | 禁用Emoji、占位图、暂缓功能 | **每次开发前** |
+| `docs/04-功能模块设计.md` | 7大模块详细设计 | 开发功能前 |
+| `docs/06-界面设计规范.md` | UI规范、色彩、交互 | 开发页面前 |
+| `docs/08-技术栈与架构.md` | 代码示例、组件库用法 | 写代码前 |
+| `docs/09-API接口规范.md` | 接口列表、响应格式 | 开发接口前 |
+| `docs/数据库设计/README.md` | 38张表结构 | 操作数据前 |
+| `design-references/` | Keep App 参考图 | 设计页面时 |
+
+---
+
+## 强制规则
+
+### 1. 禁止使用 Emoji
+
+小程序内部一律禁止使用任何 Emoji 表情符号，包括：
+- 按钮文字
+- 标题和正文
+- 提示信息
+- 注释中的装饰性 Emoji
+
+```
+❌ 错误：提交成功 🎉
+✅ 正确：提交成功
+```
+
+### 2. 图标和图片占位
+
+所有图标、图片位置使用占位符，等待设计稿填充：
+
+```vue
+<!-- 图标占位 -->
+<view class="icon-placeholder"></view>
+
+<!-- 图片占位 -->
+<image src="/static/placeholder/default.png" mode="aspectFill" />
+```
+
+```scss
+.icon-placeholder {
+  width: 48rpx;
+  height: 48rpx;
+  background-color: #E5E5E5;
+  border-radius: 8rpx;
+}
+```
+
+### 3. 适老化功能默认关闭
+
+适老化/长辈模式功能必须实现但默认关闭：
+
+```typescript
+const elderlyMode = ref(false) // 默认关闭
+```
+
+---
+
+## 技术栈规范
+
+### 小程序前端
+
+| 项目 | 技术 |
+|-----|------|
+| 框架 | uni-app + Vue 3 |
+| 语言 | TypeScript |
+| UI组件库 | Wot Design Uni（优先使用） |
+| 状态管理 | Pinia |
+| 样式 | SCSS + CSS变量 |
+
+### 后端
+
+| 项目 | 技术 |
+|-----|------|
+| 框架 | Python + FastAPI |
+| ORM | SQLAlchemy 2.0 |
+| 数据库 | MySQL 8.0 |
+| 缓存 | Redis |
+
+### Web管理端
+
+| 项目 | 技术 |
+|-----|------|
+| 框架 | Vue 3 + TypeScript |
+| UI组件库 | Element Plus |
+| 构建工具 | Vite |
+
+---
+
+## 代码风格
+
+### Vue 组件
+
+使用 `<script setup lang="ts">` 语法：
+
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { onLoad, onShow } from '@dcloudio/uni-app'
+
+// Props
+const props = defineProps<{
+  id?: string
+}>()
+
+// State
+const loading = ref(false)
+
+// Computed
+const isValid = computed(() => ...)
+
+// Methods
+function handleSubmit() {
+  // ...
+}
+
+// Lifecycle
+onLoad((options) => {
+  console.log(options)
+})
+</script>
+
+<template>
+  <!-- 模板内容 -->
+</template>
+
+<style lang="scss" scoped>
+/* 样式 */
+</style>
+```
+
+### Pinia Store
+
+使用 Setup 风格定义 Store：
+
+```typescript
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+export const useXxxStore = defineStore('xxx', () => {
+  // state
+  const data = ref(null)
+  
+  // getters
+  const isEmpty = computed(() => !data.value)
+  
+  // actions
+  function setData(value) {
+    data.value = value
+  }
+  
+  return { data, isEmpty, setData }
+})
+```
+
+### API 请求
+
+统一使用封装的请求方法：
+
+```typescript
+// api/user.ts
+import { request } from '@/utils/request'
+
+export function getUserInfo() {
+  return request.get('/user/profile')
+}
+
+export function updateUserInfo(data: UserInfo) {
+  return request.put('/user/profile', data)
+}
+```
+
+---
+
+## 暂缓实现功能
+
+以下功能后端暂不实现，前端做好界面和接口预留：
+
+### 健康筛查内核
+- AI 分析算法
+- 硬件蓝牙连接
+- 面部识别
+- 膳食图像识别
+
+### 运动模块
+- GPS 轨迹后端存储（需申请地图服务）
+
+### 支付模块
+- 微信/支付宝支付（需商户资质）
+
+暂缓功能的代码注释规范：
+
+```typescript
+/**
+ * 上传GPS轨迹
+ * 
+ * TODO: 暂缓实现
+ * 原因: 后端GPS服务未开通
+ * 当前: 本地存储，模拟上传成功
+ * 后续: 对接后端轨迹存储接口
+ */
+async function uploadGPSTrack(data: TrackData) {
+  // 模拟成功
+  return { success: true, trackId: 'mock_id' }
+}
+```
+
+```python
+@router.post("/track/upload")
+async def upload_gps_track(track_data: TrackUpload):
+    """
+    上传GPS轨迹数据
+    
+    TODO: 暂缓实现
+    原因: 需要申请地图服务
+    当前: 直接返回成功
+    """
+    return {"code": 200, "message": "success", "data": {"track_id": "mock_id"}}
+```
+
+---
+
+## AI 服务配置
+
+使用阿里云百炼平台，API Key 在环境变量中配置：
+
+```python
+# .env
+DASHSCOPE_API_KEY=  # 待填入
+
+# config.py
+class Settings:
+    DASHSCOPE_API_KEY: str = ""  # 从环境变量读取
+```
+
+---
+
+## 组件库使用优先级
+
+1. **Wot Design Uni** - 优先使用
+2. **uni-ui** - Wot 没有时补充
+3. **自定义组件** - 特殊需求时编写
+
+---
+
+## 文件命名规范
+
+### 页面文件
+```
+pages/
+├── index/
+│   └── index.vue           # 首页
+├── user/
+│   ├── index.vue           # 个人中心
+│   ├── profile.vue         # 个人资料
+│   └── settings.vue        # 设置
+```
+
+### 组件文件
+```
+components/
+├── HealthCard.vue          # PascalCase
+├── SportTimer.vue
+└── FoodRecord.vue
+```
+
+### Store 文件
+```
+stores/
+├── user.ts                 # 用户状态
+├── cart.ts                 # 购物车
+└── app.ts                  # 应用全局
+```
+
+### API 文件
+```
+api/
+├── user.ts                 # 用户相关
+├── health.ts               # 健康筛查
+├── shop.ts                 # 商城
+└── index.ts                # 导出
+```
+
+---
+
+## 色彩使用
+
+使用 CSS 变量，不硬性规定具体页面颜色：
+
+```scss
+:root {
+  --color-primary: #0071e3;
+  --color-success: #34C759;
+  --color-warning: #FF9500;
+  --color-error: #FF3B30;
+  --bg-page: #F5F5F7;
+  --bg-card: #FFFFFF;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --border-color: #E5E5E5;
+}
+```
+
+---
+
+## 设计参考
+
+### 主要参考
+
+1. **Keep App** - 运动健康类应用的交互和布局参考
+   - 参考图存放在 `design-references/` 目录
+
+2. **Apple App Store** - 前端设计风格参考
+   - 源码位于 `apps.apple.com-master/` 目录
+   - 在无效果图时，模仿其设计风格
+
+### Apple 设计风格特点
+
+从 App Store 源码提取的设计规范：
+
+**圆角**：
+```scss
+// 标准圆角
+--border-radius-small: 8px;
+--border-radius-medium: 12px;
+--border-radius-large: 16px;
+
+// App 图标圆角
+.app-icon { border-radius: 23%; }
+```
+
+**卡片样式**：
+```scss
+.card {
+  border-radius: var(--global-border-radius-large);
+  border: 1px solid var(--systemQuaternary);
+  overflow: hidden;
+}
+```
+
+**响应式断点**：
+```scss
+// 参考 App Store 的视口定义
+$viewports: ('xsmall', 'small', 'medium', 'large', 'xlarge');
+```
+
+**渐变遮罩**：
+```scss
+.gradient-mask {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+```
+
+---
+
+## 可用的 MCP 工具
+
+本项目配置了以下 MCP 工具，开发时可自行调用：
+
+### 1. MySQL MCP
+
+用于直接操作数据库，无需用户手动执行 SQL。
+
+**可用操作**：
+- `mcp_mysql_connect_db` - 连接数据库
+- `mcp_mysql_query` - 执行 SELECT 查询
+- `mcp_mysql_execute` - 执行 INSERT/UPDATE/DELETE
+- `mcp_mysql_list_tables` - 列出所有表
+- `mcp_mysql_describe_table` - 查看表结构
+
+**数据库连接信息**：
+```
+host: localhost
+user: root
+password: 1234
+database: health_db
+```
+
+**使用场景**：
+- 查询数据验证功能
+- 插入测试数据
+- 修改表结构
+- 调试数据问题
+
+### 2. Context7 MCP
+
+用于查询最新的技术文档和代码示例。
+
+**可用操作**：
+- `mcp_context7_resolve-library-id` - 解析库名获取文档 ID
+- `mcp_context7_get-library-docs` - 获取库的最新文档
+
+**使用场景**：
+- 查询 Wot Design Uni 组件用法
+- 查询 FastAPI 最新 API
+- 查询 uni-app Vue 3 语法
+- 查询 Pinia 状态管理
+- 任何需要查阅最新文档的场景
+
+**使用示例**：
+```
+1. 先解析库名: resolve-library-id("wot-design-uni")
+2. 再获取文档: get-library-docs(libraryId, topic="button")
+```
+
+---
+
+## 响应式语言
+
+使用中文进行代码注释和文档编写。
+
