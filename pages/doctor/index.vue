@@ -1,9 +1,18 @@
 <template>
   <view class="page">
-    <wd-tabs v-model="currentTab" sticky>
-      <wd-tab title="找医生" name="doctor"></wd-tab>
-      <wd-tab title="健康科普" name="article"></wd-tab>
-    </wd-tabs>
+    <!-- 标签栏 -->
+    <view class="tabs-wrapper">
+      <view 
+        class="tab-item" 
+        :class="{ active: currentTab === 'doctor' }"
+        @click="currentTab = 'doctor'"
+      >找医生</view>
+      <view 
+        class="tab-item" 
+        :class="{ active: currentTab === 'article' }"
+        @click="currentTab = 'article'"
+      >健康科普</view>
+    </view>
     
     <view class="content">
       <view class="doctor-list" v-if="currentTab === 'doctor'">
@@ -66,7 +75,7 @@ function goDoctorDetail(id: number) {
 }
 
 function goArticleDetail(id: number) {
-  uni.showToast({ title: '查看文章详情', icon: 'none' })
+  uni.navigateTo({ url: `/pages/doctor/article?id=${id}` })
 }
 </script>
 
@@ -74,6 +83,38 @@ function goArticleDetail(id: number) {
 .page {
   min-height: 100vh;
   background-color: #F5F5F7;
+}
+
+.tabs-wrapper {
+  display: flex;
+  background: #FFFFFF;
+  padding: 12px 0;
+  
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    font-size: 15px;
+    color: #86868B;
+    position: relative;
+    padding: 8px 0;
+    
+    &.active {
+      color: #1D1D1F;
+      font-weight: 600;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 24px;
+        height: 3px;
+        background: #0071e3;
+        border-radius: 2px;
+      }
+    }
+  }
 }
 
 .doctor-list,

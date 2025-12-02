@@ -263,3 +263,16 @@ async def get_food_stats(
         "avg_daily_calories": round(total_calories / days, 1) if days > 0 else 0,
     })
 
+
+
+
+
+
+
+
+
+
+
+
+
+

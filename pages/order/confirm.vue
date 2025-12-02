@@ -4,8 +4,8 @@
     <view class="address-card" @click="selectAddress">
       <view v-if="address" class="address-info">
         <view class="user-row">
-          <text class="name">{{ address.name }}</text>
-          <text class="phone">{{ address.phone }}</text>
+          <text class="name">{{ address.name || address.receiver_name }}</text>
+          <text class="phone">{{ address.phone || address.receiver_phone }}</text>
         </view>
         <text class="detail">{{ address.province }}{{ address.city }}{{ address.district }}{{ address.detail }}</text>
       </view>
@@ -19,12 +19,12 @@
     <!-- 商品列表 -->
     <view class="goods-card">
       <view class="goods-item" v-for="item in orderItems" :key="item.id">
-        <image :src="item.product?.images?.[0] || '/static/placeholder/product.png'" class="goods-image" mode="aspectFill" />
+        <image :src="item.product?.image || item.product?.images?.[0] || '/static/placeholder/product.png'" class="goods-image" mode="aspectFill" />
         <view class="goods-info">
           <text class="goods-name">{{ item.product?.name }}</text>
           <text class="goods-spec">{{ item.sku_name || '默认规格' }}</text>
           <view class="goods-footer">
-            <text class="goods-price">¥{{ item.product?.current_price }}</text>
+            <text class="goods-price">¥{{ item.product?.price || item.product?.current_price }}</text>
             <text class="goods-count">x{{ item.quantity }}</text>
           </view>
         </view>
@@ -71,7 +71,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { getCartList } from '@/api/cart'
 import { getAddressList } from '@/api/user'
-import { createOrder } from '@/api/order'
+import { createOrder, payOrder } from '@/api/order'
 
 const orderItems = ref<any[]>([])
 const address = ref<any>(null)
@@ -85,7 +85,7 @@ const selectedAddress = ref<any>(null)
 
 const goodsAmount = computed(() => {
   return orderItems.value.reduce((sum, item) => {
-    return sum + (item.product?.current_price || 0) * item.quantity
+    return sum + (item.product?.price || item.product?.current_price || 0) * item.quantity
   }, 0)
 })
 
@@ -119,9 +119,15 @@ onMounted(async () => {
 })
 
 onShow(() => {
-  // 检查是否从地址页返回
-  if (selectedAddress.value) {
-    address.value = selectedAddress.value
+  // 检查是否从地址页返回（从缓存读取）
+  const cachedAddress = uni.getStorageSync('selectedAddress')
+  if (cachedAddress) {
+    try {
+      address.value = JSON.parse(cachedAddress)
+      uni.removeStorageSync('selectedAddress') // 读取后清除
+    } catch (e) {
+      console.error('解析地址失败', e)
+    }
   }
 })
 
@@ -130,54 +136,80 @@ async function fetchData() {
   if (fromCart.value) {
     try {
       const res = await getCartList()
+      console.log('购物车数据:', res)
       if (res.code === 200) {
-        // 只获取选中的商品
-        orderItems.value = (res.data?.list || []).filter((item: any) => item.selected)
+        // 只获取选中的商品 (后端返回 is_selected: 1 或 0)
+        // 兼容处理：is_selected 可能是 1, 0, true, false
+        orderItems.value = (res.data?.list || []).filter((item: any) => {
+          return item.is_selected === 1 || item.is_selected === true
+        })
+        console.log('选中的商品:', orderItems.value)
       }
     } catch (e) {
-      console.error(e)
+      console.error('获取购物车失败:', e)
     }
   }
   
   // 获取默认地址
   try {
     const res = await getAddressList()
+    console.log('地址数据:', res)
     if (res.code === 200) {
       const list = res.data?.list || []
-      address.value = list.find((a: any) => a.is_default) || list[0]
+      address.value = list.find((a: any) => a.is_default === 1 || a.is_default === true) || list[0]
     }
   } catch (e) {
-    console.error(e)
+    console.error('获取地址失败:', e)
   }
 }
 
 function selectAddress() {
-  uni.navigateTo({ url: '/pages/address/index?select=1' })
+  uni.navigateTo({ 
+    url: '/pages/address/index?select=1',
+    events: {
+      // 监听地址选择事件
+      selectAddress: (selectedAddr: any) => {
+        address.value = selectedAddr
+      }
+    },
+    success: (res) => {
+      // 备选：从缓存读取
+      res.eventChannel?.on?.('selectAddress', (data: any) => {
+        address.value = data
+      })
+    }
+  })
 }
 
 async function submitOrder() {
+  console.log('提交订单 - 地址:', address.value)
+  console.log('提交订单 - 商品:', orderItems.value)
+  
   if (!address.value) {
     uni.showToast({ title: '请选择收货地址', icon: 'none' })
     return
   }
   
   if (orderItems.value.length === 0) {
-    uni.showToast({ title: '请选择商品', icon: 'none' })
+    uni.showToast({ title: '请先选择商品', icon: 'none' })
     return
   }
   
   submitting.value = true
   try {
-    const res = await createOrder({
+    const orderData = {
       address_id: address.value.id,
       items: orderItems.value.map(item => ({
         product_id: item.product?.id || item.product_id,
-        sku_id: item.sku_id,
+        spec_id: item.spec_id || null,
         quantity: item.quantity
       })),
-      remark: remark.value,
-      from_cart: fromCart.value
-    })
+      remark: remark.value
+    }
+    console.log('提交订单数据:', orderData)
+    
+    const res = await createOrder(orderData)
+    console.log('订单响应:', res)
     
     if (res.code === 200) {
       // 跳转支付
@@ -186,26 +218,40 @@ async function submitOrder() {
         title: '订单提交成功',
         content: `订单金额：¥${totalAmount.value.toFixed(2)}`,
         confirmText: '去支付',
-        success: (result) => {
-          if (result.confirm) {
-            // 模拟支付
+        success: async (result) => {
+          if (result.confirm && orderId) {
+            // 调用后端支付接口
             uni.showLoading({ title: '支付中...' })
-            setTimeout(() => {
+            try {
+              const payRes = await payOrder(orderId, { pay_type: 'wechat' })
               uni.hideLoading()
-              uni.showToast({ title: '支付成功', icon: 'success' })
-              setTimeout(() => {
-                uni.redirectTo({ url: '/pages/order/index' })
-              }, 1500)
-            }, 1500)
+              if (payRes.code === 200) {
+                uni.showToast({ title: '支付成功', icon: 'success' })
+                setTimeout(() => {
+                  uni.redirectTo({ url: '/pages/order/index' })
+                }, 1500)
+              } else {
+                uni.showToast({ title: payRes.message || '支付失败', icon: 'none' })
+                setTimeout(() => {
+                  uni.redirectTo({ url: '/pages/order/index' })
+                }, 1500)
+              }
+            } catch (e: any) {
+              uni.hideLoading()
+              uni.showToast({ title: e.message || '支付失败', icon: 'none' })
+              uni.redirectTo({ url: '/pages/order/index' })
+            }
           } else {
             uni.redirectTo({ url: '/pages/order/index' })
           }
         }
       })
     } else {
+      console.error('订单创建失败:', res)
       uni.showToast({ title: res.message || '提交失败', icon: 'none' })
     }
   } catch (e: any) {
+    console.error('订单提交异常:', e)
     uni.showToast({ title: e.message || '提交失败', icon: 'none' })
   } finally {
     submitting.value = false

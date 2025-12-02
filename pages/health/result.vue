@@ -137,11 +137,17 @@ async function fetchReport(id: string) {
 }
 
 function goHome() {
-  uni.switchTab({ url: '/pages/index/index' })
+  // 如果有报告ID，且从生成页过来，跳转去会员引导
+  if (result.value?.id) {
+     uni.redirectTo({ url: `/pages/user/member-guide?reportId=${result.value.id}` })
+  } else {
+     uni.switchTab({ url: '/pages/index/index' })
+  }
 }
 
 function goVip() {
-  uni.navigateTo({ url: '/pages/user/points' })
+  // 跳转到会员引导页
+  uni.navigateTo({ url: `/pages/user/member-guide?reportId=${result.value?.id || ''}` })
 }
 
 onLoad((options) => {

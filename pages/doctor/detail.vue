@@ -1,61 +1,69 @@
 <template>
   <view class="page">
-    <view class="header" v-if="doctor">
-      <image :src="doctor.avatar || '/static/placeholder/avatar.png'" class="avatar" mode="aspectFill" />
-      <text class="name">{{ doctor.name }}</text>
-      <text class="title">{{ doctor.title }} | {{ doctor.hospital }}</text>
-      <view class="tags">
-        <text class="tag" v-if="doctor.experience">从业{{ doctor.experience }}年</text>
-        <text class="tag" v-if="doctor.rating">好评率{{ doctor.rating }}</text>
+    <!-- 加载占位 -->
+    <view class="loading-placeholder" v-if="!doctor">
+      <wd-loading size="32px" />
+      <text>加载中...</text>
+    </view>
+    
+    <template v-else>
+      <view class="header">
+        <image :src="doctor.avatar || '/static/placeholder/avatar.png'" class="avatar" mode="aspectFill" />
+        <text class="name">{{ doctor.name }}</text>
+        <text class="title">{{ doctor.title }} | {{ doctor.hospital }}</text>
+        <view class="tags">
+          <text class="tag" v-if="doctor.experience">从业{{ doctor.experience }}年</text>
+          <text class="tag" v-if="doctor.rating">好评率{{ doctor.rating }}</text>
+        </view>
       </view>
-    </view>
-    
-    <view class="section">
-      <view class="section-title">擅长领域</view>
-      <text class="content">{{ doctor.specialty || '暂无信息' }}</text>
-    </view>
-    
-    <view class="section">
-      <view class="section-title">医生简介</view>
-      <text class="content">{{ doctor.introduction || '暂无简介' }}</text>
-    </view>
-    
-    <view class="section" v-if="doctor.certificates?.length">
-      <view class="section-title">资质证书</view>
-      <view class="cert-list">
-        <text class="cert-item" v-for="(cert, idx) in doctor.certificates" :key="idx">{{ cert }}</text>
+      
+      <view class="section">
+        <view class="section-title">擅长领域</view>
+        <text class="content">{{ doctor.specialty || '暂无信息' }}</text>
       </view>
-    </view>
-    
-    <view class="section">
-      <view class="section-title">服务项目</view>
-      <view class="service-list">
-        <view class="service-item" v-for="service in services" :key="service.id">
-          <view class="service-info">
-            <text class="service-name">{{ service.name }}</text>
-            <text class="service-desc">{{ service.description }}</text>
+      
+      <view class="section">
+        <view class="section-title">医生简介</view>
+        <text class="content">{{ doctor.introduction || '暂无简介' }}</text>
+      </view>
+      
+      <view class="section" v-if="doctor.certificates?.length">
+        <view class="section-title">资质证书</view>
+        <view class="cert-list">
+          <text class="cert-item" v-for="(cert, idx) in doctor.certificates" :key="idx">{{ cert }}</text>
+        </view>
+      </view>
+      
+      <view class="section">
+        <view class="section-title">服务项目</view>
+        <view class="service-list">
+          <view class="service-item" v-for="service in services" :key="service.id">
+            <view class="service-info">
+              <text class="service-name">{{ service.name }}</text>
+              <text class="service-desc">{{ service.description }}</text>
+            </view>
+            <view class="service-price">
+              <text class="price">¥{{ service.price }}</text>
+              <text class="unit">/次</text>
+            </view>
           </view>
-          <view class="service-price">
-            <text class="price">¥{{ service.price }}</text>
+        </view>
+      </view>
+      
+      <view class="footer">
+        <view class="contact-info">
+          <view class="price-row">
+            <text class="label">咨询费用</text>
+            <text class="price">¥{{ doctor.consult_price || 0 }}</text>
             <text class="unit">/次</text>
           </view>
         </view>
+        <button class="consult-btn" @click="startConsult">
+          <wd-icon name="chat" size="18px" color="#FFFFFF"></wd-icon>
+          <text>立即咨询</text>
+        </button>
       </view>
-    </view>
-    
-    <view class="footer">
-      <view class="contact-info">
-        <view class="price-row">
-          <text class="label">咨询费用</text>
-          <text class="price">¥{{ doctor.consult_price || 0 }}</text>
-          <text class="unit">/次</text>
-        </view>
-      </view>
-      <button class="consult-btn" @click="startConsult">
-        <wd-icon name="chat" size="18px" color="#FFFFFF"></wd-icon>
-        <text>立即咨询</text>
-      </button>
-    </view>
+    </template>
   </view>
 </template>
 
@@ -136,6 +144,20 @@ function startConsult() {
   min-height: 100vh;
   background: #F5F5F7;
   padding-bottom: 100px;
+}
+
+.loading-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 16px;
+  
+  text {
+    font-size: 14px;
+    color: #86868B;
+  }
 }
 
 .header {

@@ -24,3 +24,16 @@ export function getAdminInfo() {
   return request.get('/auth/info')
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

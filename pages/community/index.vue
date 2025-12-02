@@ -259,6 +259,11 @@ function publish() {
 }
 
 onShow(() => {
+  if (typeof uni.getTabBar === 'function' && uni.getTabBar()) {
+    uni.getTabBar().setData({
+      selected: 1
+    })
+  }
   fetchTopics()
   fetchPosts(true)
 })
@@ -523,7 +528,7 @@ onShow(() => {
 
 .fab-btn {
   position: fixed;
-  bottom: 24px;
+  bottom: 180rpx;
   right: 24px;
   width: 56px;
   height: 56px;

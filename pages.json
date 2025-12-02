@@ -26,6 +26,13 @@
       }
     },
     {
+      "path": "pages/health/basic-info",
+      "style": {
+        "navigationBarTitleText": "基础信息",
+        "navigationStyle": "default"
+      }
+    },
+    {
       "path": "pages/health/result",
       "style": {
         "navigationBarTitleText": "评估报告"
@@ -140,6 +147,12 @@
       }
     },
     {
+      "path": "pages/coupon/center",
+      "style": {
+        "navigationBarTitleText": "领券中心"
+      }
+    },
+    {
       "path": "pages/help/index",
       "style": {
         "navigationBarTitleText": "帮助与反馈"
@@ -149,6 +162,12 @@
       "path": "pages/login/index",
       "style": {
         "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/user/member-guide",
+      "style": {
+        "navigationStyle": "custom"
       }
     },
     {
@@ -182,6 +201,12 @@
       }
     },
     {
+      "path": "pages/doctor/article",
+      "style": {
+        "navigationBarTitleText": "健康科普"
+      }
+    },
+    {
       "path": "pages/user/points",
       "style": {
         "navigationBarTitleText": "积分明细"
@@ -204,6 +229,12 @@
       "style": {
         "navigationBarTitleText": "消息中心"
       }
+    },
+    {
+      "path": "pages/message/chat",
+      "style": {
+        "navigationBarTitleText": "私信"
+      }
     }
   ],
   "globalStyle": {
@@ -213,6 +244,7 @@
     "backgroundColor": "#F5F5F7"
   },
   "tabBar": {
+    "custom": true,
     "color": "#86868B",
     "selectedColor": "#0071e3",
     "borderStyle": "white",

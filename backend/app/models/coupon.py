@@ -59,3 +59,16 @@ class UserCoupon(Base):
     received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, comment="领取时间")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+

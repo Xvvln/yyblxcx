@@ -104,3 +104,16 @@ async def get_food_detail(
         "serving_size": food.serving_size,
     })
 
+
+
+
+
+
+
+
+
+
+
+
+
+

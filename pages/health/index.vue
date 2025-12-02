@@ -118,7 +118,7 @@ async function fetchRecords() {
 
 // 开始筛查
 function startScreening() {
-  uni.navigateTo({ url: '/pages/health/screening' })
+  uni.navigateTo({ url: '/pages/health/basic-info' })
 }
 
 // 查看报告
@@ -332,3 +332,5 @@ onShow(() => {
   }
 }
 </style>
+
+

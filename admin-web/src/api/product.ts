@@ -111,3 +111,16 @@ export function deleteCategory(id: number) {
   return request.delete(`/category/${id}`)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

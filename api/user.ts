@@ -74,8 +74,17 @@ export function updateHealthProfile(data: {
 /**
  * 获取地址列表
  */
-export function getAddressList() {
-  return request.get('/address/list')
+export async function getAddressList() {
+  const res = await request.get('/address/list')
+  // 转换后端字段名为前端期望的字段名
+  if (res.code === 200 && res.data) {
+    res.data.list = (res.data.list || res.data || []).map((item: any) => ({
+      ...item,
+      name: item.receiver_name || item.name,
+      phone: item.receiver_phone || item.phone
+    }))
+  }
+  return res
 }
 
 /**
@@ -90,14 +99,33 @@ export function addAddress(data: {
   detail: string
   is_default?: number
 }) {
-  return request.post('/address', data)
+  // 后端期望 receiver_name 和 receiver_phone
+  return request.post('/address', {
+    receiver_name: data.name,
+    receiver_phone: data.phone,
+    province: data.province,
+    city: data.city,
+    district: data.district,
+    detail: data.detail,
+    is_default: data.is_default || 0
+  })
 }
 
 /**
  * 更新地址
  */
 export function updateAddress(id: number, data: any) {
-  return request.put(`/address/${id}`, data)
+  // 后端期望 receiver_name 和 receiver_phone
+  const mappedData: any = {}
+  if (data.name !== undefined) mappedData.receiver_name = data.name
+  if (data.phone !== undefined) mappedData.receiver_phone = data.phone
+  if (data.province !== undefined) mappedData.province = data.province
+  if (data.city !== undefined) mappedData.city = data.city
+  if (data.district !== undefined) mappedData.district = data.district
+  if (data.detail !== undefined) mappedData.detail = data.detail
+  if (data.is_default !== undefined) mappedData.is_default = data.is_default
+  
+  return request.put(`/address/${id}`, mappedData)
 }
 
 /**

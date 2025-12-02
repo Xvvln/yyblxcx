@@ -136,7 +136,9 @@ async def get_my_coupons(
     total = (await db.execute(count_query)).scalar()
     
     # 联表查询
-    query = select(UserCoupon, Coupon).join(Coupon).where(*conditions).order_by(
+    query = select(UserCoupon, Coupon).join(
+        Coupon, UserCoupon.coupon_id == Coupon.id
+    ).where(*conditions).order_by(
         UserCoupon.received_at.desc()
     ).offset((page - 1) * page_size).limit(page_size)
     

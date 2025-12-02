@@ -1,0 +1,28 @@
+<!-- custom-tab-bar/index.wxml -->
+<view class="tab-bar-container">
+  <!-- 模糊背景层 -->
+  <view class="glass-background bar-layout"></view>
+  
+  <!-- 内容层 -->
+  <view class="tab-bar bar-layout">
+    <!-- 移动滑块背景 -->
+    <view class="tab-slider-track">
+      <view class="tab-slider" style="left: {{selected * 25}}%;">
+        <view class="slider-inner"></view>
+      </view>
+    </view>
+
+    <!-- Tab 项 -->
+    <view wx:for="{{list}}" wx:key="index" class="tab-bar-item {{selected === index ? 'active' : ''}}" data-path="{{item.pagePath}}" data-index="{{index}}" catchtap="switchTab">
+      <view class="content-box">
+        <view class="icon-box">
+          <image class="icon" src="{{selected === index ? item.selectedIconPath : item.iconPath}}"></image>
+          <!-- 角标 -->
+          <view wx:if="{{item.badge > 0}}" class="badge">{{item.badge}}</view>
+          <view wx:if="{{item.showRedDot}}" class="red-dot"></view>
+        </view>
+        <view class="text" style="color: {{selected === index ? selectedColor : color}}">{{item.text}}</view>
+      </view>
+    </view>
+  </view>
+</view>

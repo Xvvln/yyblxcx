@@ -57,7 +57,7 @@ export function uncollectProduct(id: number) {
  * 获取收藏列表
  */
 export function getCollectList(params?: { page?: number; page_size?: number }) {
-  return request.get('/shop/collect', params)
+  return request.get('/shop/my-collects', params)
 }
 
 // ========== 购物车 ==========

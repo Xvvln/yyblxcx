@@ -124,3 +124,16 @@ class UserAddressUpdate(BaseModel):
     is_default: Optional[int] = Field(None, ge=0, le=1, description="是否默认")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+

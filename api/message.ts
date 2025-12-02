@@ -75,3 +75,16 @@ export function deleteNotification(id: number) {
   return request.delete(`/notification/${id}`)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

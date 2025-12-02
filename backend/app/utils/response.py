@@ -45,3 +45,16 @@ def paginate(items: list, total: int, page: int, page_size: int) -> dict:
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+

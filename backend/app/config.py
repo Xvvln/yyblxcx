@@ -1,60 +1,43 @@
 """
-应用配置模块
+配置管理模块
 """
 from pydantic_settings import BaseSettings
-from functools import lru_cache
+from typing import Optional
 
 
 class Settings(BaseSettings):
     """应用配置"""
     
-    # 应用信息
-    APP_NAME: str = "营养不良筛查与健康管理API"
+    # 应用基本信息
+    APP_NAME: str = "营养不良筛查与健康管理"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
     
     # 数据库配置
     DATABASE_URL: str = "mysql+aiomysql://root:1234@localhost:3306/health_db"
     
-    # Redis 配置
-    REDIS_URL: str = "redis://localhost:6379"
-    
     # JWT 配置
-    JWT_SECRET_KEY: str = "your-super-secret-key-change-in-production-2024"
+    JWT_SECRET_KEY: str = "your-super-secret-key-change-in-production"
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRE_MINUTES: int = 10080  # 7天
+    JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 天
+    
+    # 上传目录
+    UPLOAD_DIR: str = "uploads"
     
     # 微信小程序配置
-    WECHAT_APPID: str = ""
-    WECHAT_SECRET: str = ""
+    WECHAT_APPID: str = "wxeec4f29b9dc7b78b"
+    WECHAT_SECRET: str = "9c1a5d9fd4d29b56d601d5d083e39a0d"
     
-    # 百炼平台 AI 配置
-    DASHSCOPE_API_KEY: str = ""
+    # 阿里云百炼 AI 服务配置（可选）
+    DASHSCOPE_API_KEY: Optional[str] = None
     DASHSCOPE_MODEL: str = "qwen-turbo"
-    
-    # 微信支付配置（暂缓实现）
-    WECHAT_MCH_ID: str = ""
-    WECHAT_API_KEY: str = ""
-    
-    # 地图服务配置（暂缓实现）
-    TENCENT_MAP_KEY: str = ""
-    
-    # 文件上传配置
-    UPLOAD_DIR: str = "uploads"
-    MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
-    ALLOWED_IMAGE_TYPES: list = ["image/jpeg", "image/png", "image/gif", "image/webp"]
     
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        case_sensitive = True
+        extra = "ignore"  # 允许忽略 .env 中的额外字段
 
 
-@lru_cache()
-def get_settings() -> Settings:
-    """获取配置单例"""
-    return Settings()
-
-
-settings = get_settings()
-
-
+# 全局配置实例
+settings = Settings()

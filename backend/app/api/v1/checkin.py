@@ -231,3 +231,16 @@ async def get_checkin_stats(
         "total_food_coins_earned": total_food_coins,
     })
 
+
+
+
+
+
+
+
+
+
+
+
+
+

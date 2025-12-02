@@ -30,3 +30,16 @@ export function updateUserStatus(id: number, data: { status: number; reason?: st
   return request.put(`/user/${id}/status`, data)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

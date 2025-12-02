@@ -163,7 +163,11 @@ async function toggleFollow() {
 }
 
 function sendMessage() {
-  uni.showToast({ title: '私信功能开发中', icon: 'none' })
+  if (!userInfo.value) return
+  const name = encodeURIComponent(userInfo.value.nickname || '用户')
+  uni.navigateTo({ 
+    url: `/pages/message/chat?id=${userId.value}&name=${name}` 
+  })
 }
 
 function viewPost(id: number) {

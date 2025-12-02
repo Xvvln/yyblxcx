@@ -31,3 +31,16 @@ export function updateMemberConfig(data: any) {
   return request.put('/setting/member', data)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

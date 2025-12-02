@@ -11,6 +11,14 @@ export function wxLogin(code: string) {
 }
 
 /**
+ * 开发环境登录（无需微信code）
+ */
+export function devLogin(openid?: string) {
+  const id = openid || 'dev_user_001'
+  return request.post(`/auth/dev-login?openid=${encodeURIComponent(id)}`)
+}
+
+/**
  * 完善用户信息（注册）
  */
 export function register(data: {
@@ -23,4 +31,15 @@ export function register(data: {
 }) {
   return request.post('/auth/register', data)
 }
+
+
+
+
+
+
+
+
+
+
+
 

@@ -22,10 +22,15 @@ export function getCartCount() {
  */
 export function addToCart(data: {
   product_id: number
-  sku_id?: number
+  sku_id?: number | string
   quantity: number
 }) {
-  return request.post('/cart', data)
+  // 后端期望 spec_id
+  return request.post('/cart', {
+    product_id: data.product_id,
+    spec_id: data.sku_id || null,
+    quantity: data.quantity
+  })
 }
 
 /**

@@ -165,7 +165,7 @@
       </view>
       
       <!-- 底部留白 -->
-      <view style="height: 100px;"></view>
+      <view style="height: 120px;"></view>
     </scroll-view>
   </view>
 </template>
@@ -304,7 +304,7 @@ async function handleTaskAction(task: any) {
     } else if (task.task_type === 'checkin') {
       handleCheckin()
     } else {
-      navigateTo('/pages/health/screening')
+      navigateTo('/pages/health/basic-info')
     }
     return
   }
@@ -365,6 +365,11 @@ onLoad(() => {
 
 // 每次显示时刷新
 onShow(() => {
+  if (typeof uni.getTabBar === 'function' && uni.getTabBar()) {
+    uni.getTabBar().setData({
+      selected: 0
+    })
+  }
   loadData()
 })
 </script>

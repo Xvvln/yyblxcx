@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { getCartList, updateCartItem, deleteCartItem } from '@/api/shop'
+import { getCartList, updateCartItem, deleteCartItem } from '@/api/cart'
 
 interface CartItem {
   id: number

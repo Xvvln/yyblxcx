@@ -1,22 +1,29 @@
 <template>
   <view class="page">
-    <!-- 切换Tab -->
-    <view class="tab-bar">
-      <view 
-        class="tab-item" 
-        :class="{ active: currentTab === 'available' }"
-        @click="switchTab('available')"
-      >可使用</view>
-      <view 
-        class="tab-item" 
-        :class="{ active: currentTab === 'used' }"
-        @click="switchTab('used')"
-      >已使用</view>
-      <view 
-        class="tab-item" 
-        :class="{ active: currentTab === 'expired' }"
-        @click="switchTab('expired')"
-      >已过期</view>
+    <!-- 顶部栏 -->
+    <view class="header-bar">
+      <!-- 切换Tab -->
+      <view class="tab-bar">
+        <view 
+          class="tab-item" 
+          :class="{ active: currentTab === 'unused' }"
+          @click="switchTab('available')"
+        >可使用</view>
+        <view 
+          class="tab-item" 
+          :class="{ active: currentTab === 'used' }"
+          @click="switchTab('used')"
+        >已使用</view>
+        <view 
+          class="tab-item" 
+          :class="{ active: currentTab === 'expired' }"
+          @click="switchTab('expired')"
+        >已过期</view>
+      </view>
+      <view class="header-action" @click="goCouponCenter">
+        <wd-icon name="coupon" size="16px" color="#0071e3"></wd-icon>
+        <text>领券</text>
+      </view>
     </view>
 
     <!-- 优惠券列表 -->
@@ -25,7 +32,7 @@
         class="coupon-item" 
         v-for="coupon in filteredList" 
         :key="coupon.id"
-        :class="{ disabled: currentTab !== 'available' }"
+        :class="{ disabled: currentTab !== 'unused' }"
       >
         <view class="coupon-left">
           <view class="amount-row">
@@ -41,7 +48,7 @@
         </view>
         <view class="coupon-action">
           <button 
-            v-if="currentTab === 'available'" 
+            v-if="currentTab === 'unused'" 
             class="use-btn" 
             @click="useCoupon(coupon)"
           >去使用</button>
@@ -78,26 +85,27 @@ interface Coupon {
   is_new?: boolean
 }
 
-const currentTab = ref('available')
+const currentTab = ref('unused') // 使用后端期望的状态值
 const list = ref<Coupon[]>([])
 const loading = ref(false)
 const page = ref(1)
 
-const filteredList = computed(() => {
-  return list.value.filter(c => {
-    if (currentTab.value === 'available') return c.status === 'available'
-    if (currentTab.value === 'used') return c.status === 'used'
-    if (currentTab.value === 'expired') return c.status === 'expired'
-    return true
-  })
-})
+// 状态映射：前端显示 -> 后端状态
+const tabToStatus: Record<string, string> = {
+  'available': 'unused',
+  'used': 'used',
+  'expired': 'expired'
+}
+
+const filteredList = computed(() => list.value)
 
 onMounted(() => {
   fetchCoupons()
 })
 
 function switchTab(tab: string) {
-  currentTab.value = tab
+  currentTab.value = tabToStatus[tab] || 'unused'
+  fetchCoupons()
 }
 
 async function fetchCoupons() {
@@ -105,16 +113,21 @@ async function fetchCoupons() {
   try {
     const res = await getMyCoupons({ status: currentTab.value })
     if (res.code === 200) {
-      list.value = res.data?.list || []
+      // 转换后端数据格式
+      list.value = (res.data?.list || []).map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        amount: item.type === 'fixed' ? item.value : item.value, // 固定金额或百分比
+        min_amount: item.min_amount,
+        scope_desc: item.type === 'percent' ? `${item.value}%折扣` : undefined,
+        expire_time: item.end_time,
+        status: item.status === 'unused' ? 'available' : item.status,
+        is_new: false
+      }))
     }
   } catch (e) {
     console.error(e)
-    // 模拟数据
-    list.value = [
-      { id: 1, name: '新人专享券', amount: 10, min_amount: 50, expire_time: '2025-12-31', status: 'available', is_new: true },
-      { id: 2, name: '满减优惠券', amount: 20, min_amount: 100, expire_time: '2025-12-31', status: 'available' },
-      { id: 3, name: '运动装备券', amount: 30, min_amount: 200, scope_desc: '运动装备', expire_time: '2025-11-30', status: 'expired' }
-    ]
+    list.value = []
   } finally {
     loading.value = false
   }
@@ -129,7 +142,7 @@ function useCoupon(coupon: Coupon) {
 }
 
 function goCouponCenter() {
-  uni.showToast({ title: '领券中心开发中', icon: 'none' })
+  uni.navigateTo({ url: '/pages/coupon/center' })
 }
 </script>
 
@@ -139,10 +152,31 @@ function goCouponCenter() {
   background: #F5F5F7;
 }
 
+.header-bar {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  padding: 12px 16px;
+  
+  .header-action {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #E8F4FD;
+    border-radius: 16px;
+    
+    text {
+      font-size: 12px;
+      color: #0071e3;
+      font-weight: 500;
+    }
+  }
+}
+
 .tab-bar {
   display: flex;
-  background: #FFFFFF;
-  padding: 12px 20px;
+  flex: 1;
   
   .tab-item {
     flex: 1;

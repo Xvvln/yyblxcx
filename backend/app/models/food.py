@@ -69,3 +69,16 @@ class FoodLibrary(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, comment="创建时间")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+

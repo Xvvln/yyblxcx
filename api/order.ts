@@ -28,12 +28,11 @@ export function createOrder(data: {
   address_id: number
   items: Array<{
     product_id: number
-    sku_id?: number
+    spec_id?: string | null
     quantity: number
   }>
   coupon_id?: number
   remark?: string
-  from_cart?: boolean
 }) {
   return request.post('/order', data)
 }

@@ -42,3 +42,16 @@ export function getHealthTrend(days: number = 30) {
   return request.get('/stats/health', { days })
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

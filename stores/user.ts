@@ -3,7 +3,7 @@
  */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { wxLogin, register } from '@/api/auth'
+import { wxLogin, devLogin as apiDevLogin, register } from '@/api/auth'
 import { getUserProfile } from '@/api/user'
 
 export interface UserInfo {
@@ -70,6 +70,31 @@ export const useUserStore = defineStore('user', () => {
       throw new Error(res.message)
     } catch (error) {
       console.error('Login failed:', error)
+      throw error
+    }
+  }
+  
+  /**
+   * 开发环境登录（无需微信）
+   */
+  async function devLogin(openid?: string) {
+    try {
+      const res = await apiDevLogin(openid)
+      if (res.code === 200) {
+        setToken(res.data.token)
+        // 设置基础用户信息
+        setUserInfo({
+          id: res.data.user_id,
+          nickname: res.data.nickname || '测试用户',
+          avatar: res.data.avatar || '',
+          sport_coins: 0,
+          food_coins: 0
+        })
+        return res.data
+      }
+      throw new Error(res.message)
+    } catch (error) {
+      console.error('Dev login failed:', error)
       throw error
     }
   }
@@ -145,6 +170,7 @@ export const useUserStore = defineStore('user', () => {
     setToken,
     setUserInfo,
     login,
+    devLogin,
     completeProfile,
     fetchUserInfo,
     logout,

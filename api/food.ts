@@ -74,3 +74,16 @@ export function getFoodDetail(id: number) {
   return request.get(`/food-library/${id}`)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

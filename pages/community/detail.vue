@@ -40,10 +40,10 @@
           <wd-icon name="comment" size="20px" color="#86868B"></wd-icon>
           <text>{{ post.comment_count || 0 }}</text>
         </view>
-        <view class="action-item" @click="sharePost">
+        <button class="action-item share-btn" open-type="share">
           <wd-icon name="share" size="20px" color="#86868B"></wd-icon>
           <text>分享</text>
-        </view>
+        </button>
       </view>
     </view>
     
@@ -97,6 +97,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { getPostDetail, getPostComments, likePost, unlikePost, commentPost, followUser, unfollowUser } from '@/api/community'
 import { useUserStore } from '@/stores/user'
 
@@ -107,6 +108,28 @@ const comments = ref<any[]>([])
 const commentText = ref('')
 const replyToUser = ref<any>(null)
 const loading = ref(false)
+
+// 分享给朋友
+onShareAppMessage(() => {
+  const content = post.value?.content || ''
+  const title = content.length > 30 ? content.substring(0, 30) + '...' : content
+  return {
+    title: title || '来看看这条动态',
+    path: `/pages/community/detail?id=${postId.value}`,
+    imageUrl: post.value?.images?.[0] || ''
+  }
+})
+
+// 分享到朋友圈
+onShareTimeline(() => {
+  const content = post.value?.content || ''
+  const title = content.length > 30 ? content.substring(0, 30) + '...' : content
+  return {
+    title: title || '来看看这条动态',
+    query: `id=${postId.value}`,
+    imageUrl: post.value?.images?.[0] || ''
+  }
+})
 
 const replyPlaceholder = computed(() => {
   return replyToUser.value ? `回复 @${replyToUser.value.nickname}` : '说点什么...'
@@ -222,10 +245,6 @@ function previewImage(index: number) {
     current: index,
     urls: post.value.images
   })
-}
-
-function sharePost() {
-  uni.showToast({ title: '分享功能开发中', icon: 'none' })
 }
 
 function formatTime(time: string) {
@@ -348,6 +367,18 @@ function formatTime(time: string) {
       text {
         font-size: 13px;
         color: #86868B;
+      }
+    }
+    
+    .share-btn {
+      background: transparent;
+      border: none;
+      padding: 0;
+      margin: 0;
+      line-height: normal;
+      
+      &::after {
+        border: none;
       }
     }
   }

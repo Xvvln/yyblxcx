@@ -276,3 +276,16 @@ async def _update_goal_progress(goal: SportGoal, user_id: int, db: AsyncSession)
     if goal.current_value >= goal.target_value:
         goal.is_completed = 1
 
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -88,3 +88,16 @@ export function getCheckinStats() {
   return request.get('/checkin/stats')
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

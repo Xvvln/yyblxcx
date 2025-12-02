@@ -16,11 +16,11 @@
         </view>
         
         <view class="goods-list">
-          <view class="goods-item" v-for="goods in order.items" :key="goods.id">
-            <image :src="goods.product?.images?.[0] || '/static/placeholder/product.png'" class="goods-image" mode="aspectFill" />
+          <view class="goods-item" v-for="goods in order.items" :key="goods.id || goods.product_id">
+            <image :src="goods.product_image || goods.product?.images?.[0] || '/static/placeholder/product.png'" class="goods-image" mode="aspectFill" />
             <view class="goods-info">
-              <text class="name">{{ goods.product?.name }}</text>
-              <text class="spec">{{ goods.sku_name || '默认规格' }}</text>
+              <text class="name">{{ goods.product_name || goods.product?.name }}</text>
+              <text class="spec">{{ goods.spec_name || goods.sku_name || '默认规格' }}</text>
             </view>
             <view class="price-col">
               <text class="price">¥{{ goods.price }}</text>
@@ -32,11 +32,11 @@
         <view class="footer">
           <text class="total">共{{ order.total_quantity }}件，合计: <text class="price">¥{{ order.total_amount }}</text></text>
           <view class="btns">
-            <button v-if="order.status === 1" class="btn cancel" @click.stop="cancelOrder(order)">取消订单</button>
-            <button v-if="order.status === 1" class="btn primary" @click.stop="payOrder(order)">去支付</button>
-            <button v-if="order.status === 3" class="btn primary" @click.stop="confirmReceipt(order)">确认收货</button>
-            <button v-if="order.status === 4" class="btn" @click.stop="reviewOrder(order)">评价</button>
-            <button v-if="order.status === 4" class="btn" @click.stop="buyAgain(order)">再次购买</button>
+            <button v-if="order.status === 'pending'" class="btn cancel" @click.stop="cancelOrder(order)">取消订单</button>
+            <button v-if="order.status === 'pending'" class="btn primary" @click.stop="payOrder(order)">去支付</button>
+            <button v-if="order.status === 'shipped'" class="btn primary" @click.stop="confirmReceipt(order)">确认收货</button>
+            <button v-if="order.status === 'received' || order.status === 'completed'" class="btn" @click.stop="reviewOrder(order)">评价</button>
+            <button v-if="order.status === 'received' || order.status === 'completed'" class="btn" @click.stop="buyAgain(order)">再次购买</button>
           </view>
         </view>
       </view>
@@ -89,13 +89,22 @@ function onTabChange() {
   fetchOrders()
 }
 
+// 前端tab状态到后端状态的映射
+const statusMap: Record<number, string | undefined> = {
+  0: undefined, // 全部
+  1: 'pending', // 待付款
+  2: 'paid',    // 待发货
+  3: 'shipped', // 待收货
+  4: 'received', // 已完成 (包括 received, completed)
+}
+
 async function fetchOrders() {
   if (loading.value) return
   
   loading.value = true
   try {
     const res = await getOrderList({
-      status: currentStatus.value === 0 ? undefined : currentStatus.value,
+      status: statusMap[currentStatus.value],
       page: page.value,
       page_size: 10
     })
@@ -123,15 +132,17 @@ function loadMore() {
   }
 }
 
-function statusText(status: number) {
-  const map: Record<number, string> = {
-    1: '待付款',
-    2: '待发货',
-    3: '待收货',
-    4: '已完成',
-    5: '已取消'
+function statusText(status: string) {
+  const map: Record<string, string> = {
+    'pending': '待付款',
+    'paid': '待发货',
+    'shipped': '待收货',
+    'received': '已完成',
+    'completed': '已完成',
+    'cancelled': '已取消',
+    'refunded': '已退款'
   }
-  return map[status] || ''
+  return map[status] || status
 }
 
 function viewDetail(order: any) {
@@ -148,7 +159,7 @@ async function cancelOrder(order: any) {
           const result = await apiCancelOrder(order.id)
           if (result.code === 200) {
             uni.showToast({ title: '已取消', icon: 'success' })
-            order.status = 5
+            order.status = 'cancelled'
           }
         } catch (e: any) {
           uni.showToast({ title: e.message || '取消失败', icon: 'none' })
@@ -164,7 +175,7 @@ async function payOrder(order: any) {
     const res = await apiPayOrder(order.id, { pay_type: 'wechat' })
     if (res.code === 200) {
       uni.showToast({ title: '支付成功', icon: 'success' })
-      order.status = 2
+      order.status = 'paid'
     }
   } catch (e: any) {
     uni.showToast({ title: e.message || '支付失败', icon: 'none' })
@@ -183,7 +194,7 @@ async function confirmReceipt(order: any) {
           const result = await confirmOrder(order.id)
           if (result.code === 200) {
             uni.showToast({ title: '已确认收货', icon: 'success' })
-            order.status = 4
+            order.status = 'received'
           }
         } catch (e: any) {
           uni.showToast({ title: e.message || '操作失败', icon: 'none' })
@@ -233,11 +244,11 @@ function buyAgain(order: any) {
         font-size: 13px;
         font-weight: 500;
         
-        &.status-1 { color: #FF9500; }
-        &.status-2 { color: #0071e3; }
-        &.status-3 { color: #34C759; }
-        &.status-4 { color: #86868B; }
-        &.status-5 { color: #86868B; }
+        &.status-pending { color: #FF9500; }
+        &.status-paid { color: #0071e3; }
+        &.status-shipped { color: #34C759; }
+        &.status-received, &.status-completed { color: #86868B; }
+        &.status-cancelled, &.status-refunded { color: #86868B; }
       }
     }
     

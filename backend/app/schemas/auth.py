@@ -31,3 +31,16 @@ class RegisterRequest(BaseModel):
     phone: Optional[str] = Field(None, max_length=20, description="手机号")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,7 +1,16 @@
 <template>
   <view class="page">
     <view class="address-list" v-if="list.length > 0">
-      <view class="address-item" v-for="item in list" :key="item.id" @click="selectAddress(item)">
+      <view 
+        class="address-item" 
+        :class="{ selectable: selectMode }"
+        v-for="item in list" 
+        :key="item.id" 
+        @click="selectAddress(item)"
+      >
+        <view v-if="selectMode" class="radio-box">
+          <wd-icon name="check" size="14px" color="#FFFFFF" v-if="false"></wd-icon>
+        </view>
         <view class="info">
           <view class="user-row">
             <text class="name">{{ item.name }}</text>
@@ -10,7 +19,7 @@
           </view>
           <text class="detail">{{ item.province }}{{ item.city }}{{ item.district }}{{ item.detail }}</text>
         </view>
-        <view class="actions">
+        <view class="actions" v-if="!selectMode">
           <view class="action-btn" @click.stop="setDefault(item)" v-if="!item.is_default">
             <wd-icon name="location" size="18px" color="#86868B"></wd-icon>
           </view>
@@ -20,6 +29,10 @@
           <view class="action-btn" @click.stop="deleteAddress(item)">
             <wd-icon name="delete" size="18px" color="#FF3B30"></wd-icon>
           </view>
+        </view>
+        <view class="select-hint" v-if="selectMode">
+          <text>点击选择</text>
+          <wd-icon name="arrow-right" size="14px" color="#0071e3"></wd-icon>
         </view>
       </view>
     </view>
@@ -83,8 +96,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { onShow } from '@dcloudio/uni-app'
+import { ref, reactive } from 'vue'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { getAddressList, addAddress as apiAddAddress, updateAddress, deleteAddress as apiDeleteAddress, setDefaultAddress } from '@/api/user'
 
 interface Address {
@@ -115,10 +128,9 @@ const form = reactive({
   is_default: false
 })
 
-onMounted(() => {
-  const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1] as any
-  selectMode.value = currentPage.options?.select === '1'
+onLoad((options) => {
+  selectMode.value = options?.select === '1'
+  console.log('地址页面 selectMode:', selectMode.value, options)
 })
 
 onShow(() => {
@@ -280,12 +292,13 @@ async function setDefault(item: Address) {
 
 function selectAddress(item: Address) {
   if (selectMode.value) {
-    // 返回选中的地址
-    const pages = getCurrentPages()
-    const prevPage = pages[pages.length - 2] as any
-    if (prevPage && prevPage.$vm) {
-      prevPage.$vm.selectedAddress = item
+    // 使用事件通道返回选中的地址
+    const eventChannel = uni.getOpenerEventChannel?.()
+    if (eventChannel) {
+      eventChannel.emit('selectAddress', item)
     }
+    // 同时存储到缓存中作为备选方案
+    uni.setStorageSync('selectedAddress', JSON.stringify(item))
     uni.navigateBack()
   }
 }
@@ -302,6 +315,36 @@ function selectAddress(item: Address) {
 .address-item {
   background: #FFFFFF;
   border-radius: 16px;
+  
+  &.selectable {
+    cursor: pointer;
+    
+    &:active {
+      background: #F5F5F7;
+    }
+  }
+  
+  .radio-box {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #E5E5EA;
+    border-radius: 50%;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .select-hint {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    
+    text {
+      font-size: 13px;
+      color: #0071e3;
+    }
+  }
   padding: 16px;
   margin-bottom: 12px;
   display: flex;

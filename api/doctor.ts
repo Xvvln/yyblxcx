@@ -39,3 +39,16 @@ export function getArticleDetail(id: number) {
   return request.get(`/article/${id}`)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

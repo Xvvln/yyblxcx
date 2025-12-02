@@ -122,3 +122,16 @@ export function getMyCourseCollects(params?: { page?: number; page_size?: number
   return request.get('/course/my-collects', params)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

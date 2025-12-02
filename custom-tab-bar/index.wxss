@@ -1,0 +1,160 @@
+.tab-bar-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* 公共样式 */
+.bar-layout {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) - 10rpx);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  height: 100rpx;
+  border-radius: 50rpx;
+  padding-bottom: 0;
+}
+
+/* 1. 玻璃背景层 */
+.glass-background {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  /* 模拟 iOS 16 悬浮岛的阴影 */
+  box-shadow: 
+    0 4rpx 8rpx rgba(0, 0, 0, 0.04),
+    0 12rpx 30rpx rgba(0, 0, 0, 0.08),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
+}
+
+/* 2. 导航栏内容层 */
+.tab-bar {
+  pointer-events: auto;
+  display: flex;
+  justify-content: space-around; /* 均匀分布 */
+  align-items: center;
+  padding: 0 10rpx;
+  box-sizing: border-box;
+}
+
+/* 滑块轨道 */
+.tab-slider-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 移动滑块 - 选中态背景 */
+.tab-slider {
+  position: absolute;
+  top: 12rpx;
+  bottom: 12rpx;
+  width: 25%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1); /* iOS 风格的缓动 */
+}
+
+.slider-inner {
+  width: 100%;
+  height: 100%;
+  transform: scale(0.9); /* 稍微留点边距 */
+  background: rgba(0, 113, 227, 0.1); /* 蓝色主色调的淡背景 */
+  border-radius: 44rpx; /* 胶囊圆角 */
+}
+
+/* Tab 项 */
+.tab-bar-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.content-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.icon-box {
+  width: 56rpx;
+  height: 56rpx;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rpx;
+}
+
+.icon {
+  width: 48rpx;
+  height: 48rpx;
+  display: block;
+  transition: all 0.2s ease;
+}
+
+/* 选中时图标有个微小的动效 */
+.tab-bar-item.active .icon {
+  transform: scale(1.05);
+}
+
+.text {
+  font-size: 20rpx;
+  font-weight: 500;
+  line-height: 1;
+  margin-top: 6rpx;
+  transition: color 0.2s;
+}
+
+.tab-bar-item.active .text {
+  font-weight: 600;
+  color: #0071e3; /* 选中文字变蓝 */
+}
+
+/* 角标样式 */
+.badge {
+  position: absolute;
+  top: -6rpx;
+  right: -10rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  padding: 0 8rpx;
+  background: #FF3B30; /* Apple Red */
+  color: #fff;
+  font-size: 20rpx;
+  line-height: 32rpx;
+  text-align: center;
+  border-radius: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2);
+  box-sizing: border-box;
+  z-index: 11;
+}
+
+.red-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16rpx;
+  height: 16rpx;
+  background: #FF3B30;
+  border-radius: 50%;
+  z-index: 11;
+}

@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted, onMounted, reactive } from 'vue'
+import { ref, computed, onUnmounted, reactive } from 'vue'
 import { submitSportRecord } from '@/api/sport'
 import { useUserStore } from '@/stores/user'
 
@@ -97,77 +97,18 @@ const currentMode = ref('outdoor_run')
 const isRunning = ref(false)
 const isPaused = ref(false)
 const timer = ref<any>(null)
-const locationTimer = ref<any>(null)
 const durationSec = ref(0)
 const distanceVal = ref(0)
 const startTime = ref<Date | null>(null)
 
-// 定位相关
+// 静态位置（不需要获取真实定位）
 const location = reactive({
-  latitude: 39.908823,
+  latitude: 39.908823,  // 北京天安门附近
   longitude: 116.397470
 })
-const trackPoints = ref<{latitude: number, longitude: number}[]>([])
 
-// 轨迹线
-const polyline = computed(() => {
-  if (trackPoints.value.length < 2) return []
-  return [{
-    points: trackPoints.value,
-    color: '#0071e3',
-    width: 6,
-    arrowLine: true
-  }]
-})
-
-// 获取当前位置
-function getCurrentLocation() {
-  uni.getLocation({
-    type: 'gcj02',
-    success: (res) => {
-      location.latitude = res.latitude
-      location.longitude = res.longitude
-      
-      // 如果正在运动，记录轨迹点
-      if (isRunning.value && !isPaused.value) {
-        const lastPoint = trackPoints.value[trackPoints.value.length - 1]
-        if (lastPoint) {
-          // 计算与上一点的距离
-          const dist = calculateDistance(
-            lastPoint.latitude, lastPoint.longitude,
-            res.latitude, res.longitude
-          )
-          distanceVal.value += dist
-        }
-        trackPoints.value.push({
-          latitude: res.latitude,
-          longitude: res.longitude
-        })
-      }
-    },
-    fail: (err) => {
-      console.error('获取位置失败', err)
-    }
-  })
-}
-
-// 计算两点间距离（公里）
-function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const rad = Math.PI / 180
-  const R = 6371 // 地球半径（公里）
-  const dLat = (lat2 - lat1) * rad
-  const dLng = (lng2 - lng1) * rad
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
-}
-
-// 初始化获取位置
-onMounted(() => {
-  getCurrentLocation()
-})
+// 轨迹线（静态展示，不实际记录）
+const polyline = computed(() => [])
 
 const distance = computed(() => distanceVal.value.toFixed(2))
 const kcal = computed(() => Math.floor(durationSec.value * 0.15))
@@ -199,21 +140,20 @@ function toggleSport() {
     isRunning.value = true
     isPaused.value = false
     startTime.value = new Date()
-    trackPoints.value = []
     distanceVal.value = 0
-    
-    // 记录起始点
-    getCurrentLocation()
     
     // 计时器
     timer.value = setInterval(() => {
       durationSec.value++
+      // 模拟距离增长（根据运动类型）
+      if (currentMode.value === 'outdoor_run') {
+        distanceVal.value += 0.003 // 约10.8km/h
+      } else if (currentMode.value === 'treadmill') {
+        distanceVal.value += 0.0025 // 约9km/h
+      } else {
+        distanceVal.value += 0.0015 // 健走约5.4km/h
+      }
     }, 1000)
-    
-    // 位置追踪（每3秒更新一次）
-    locationTimer.value = setInterval(() => {
-      getCurrentLocation()
-    }, 3000)
     
   } else if (!isPaused.value) {
     // 暂停
@@ -222,19 +162,20 @@ function toggleSport() {
       clearInterval(timer.value)
       timer.value = null
     }
-    if (locationTimer.value) {
-      clearInterval(locationTimer.value)
-      locationTimer.value = null
-    }
   } else {
     // 继续
     isPaused.value = false
     timer.value = setInterval(() => {
       durationSec.value++
+      // 模拟距离增长
+      if (currentMode.value === 'outdoor_run') {
+        distanceVal.value += 0.003
+      } else if (currentMode.value === 'treadmill') {
+        distanceVal.value += 0.0025
+      } else {
+        distanceVal.value += 0.0015
+      }
     }, 1000)
-    locationTimer.value = setInterval(() => {
-      getCurrentLocation()
-    }, 3000)
   }
 }
 
@@ -297,14 +238,9 @@ function resetSport() {
     clearInterval(timer.value)
     timer.value = null
   }
-  if (locationTimer.value) {
-    clearInterval(locationTimer.value)
-    locationTimer.value = null
-  }
   distanceVal.value = 0
   durationSec.value = 0
   startTime.value = null
-  trackPoints.value = []
 }
 
 function goBack() {
@@ -339,9 +275,6 @@ function playMusic() {
 onUnmounted(() => {
   if (timer.value) {
     clearInterval(timer.value)
-  }
-  if (locationTimer.value) {
-    clearInterval(locationTimer.value)
   }
 })
 </script>

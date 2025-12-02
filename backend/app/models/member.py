@@ -17,12 +17,11 @@ class MemberOrder(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     order_no: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, comment="订单号")
     user_id: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True, comment="用户ID")
-    plan_type: Mapped[str] = mapped_column(
-        Enum("month", "year", "lifetime", name="plan_type_enum"),
+    member_type: Mapped[str] = mapped_column(
+        Enum("month", "year", "lifetime", name="member_type_enum"),
         nullable=False,
         comment="套餐类型"
     )
-    plan_name: Mapped[str] = mapped_column(String(50), nullable=False, comment="套餐名称")
     original_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False, comment="原价")
     pay_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False, comment="实付金额")
     pay_type: Mapped[Optional[str]] = mapped_column(
@@ -36,8 +35,7 @@ class MemberOrder(Base):
         index=True,
         comment="状态"
     )
-    member_start_time: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, comment="会员开始时间")
-    member_end_time: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, comment="会员结束时间")
+    expire_time: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, comment="会员到期时间")
     pay_time: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, comment="支付时间")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True, comment="创建时间")
 

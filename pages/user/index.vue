@@ -175,6 +175,11 @@ function handleLogout() {
 }
 
 onShow(() => {
+  if (typeof uni.getTabBar === 'function' && uni.getTabBar()) {
+    uni.getTabBar().setData({
+      selected: 3
+    })
+  }
   if (userStore.isLoggedIn) {
     userStore.fetchUserInfo()
   }
@@ -185,7 +190,7 @@ onShow(() => {
 .page {
   min-height: 100vh;
   background-color: #F5F5F7;
-  padding-bottom: 40px;
+  padding-bottom: 120px;
 }
 
 .profile-header {

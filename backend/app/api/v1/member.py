@@ -133,14 +133,12 @@ async def purchase_member(
     order = MemberOrder(
         order_no=order_no,
         user_id=current_user.id,
-        plan_type=data.plan_type,
-        plan_name=plan["name"],
+        member_type=data.plan_type,
         original_price=Decimal(str(plan["original_price"])),
         pay_amount=Decimal(str(plan["price"])),
         pay_type=data.pay_type,
         status="paid",  # 模拟支付成功
-        member_start_time=start_time,
-        member_end_time=end_time,
+        expire_time=end_time,
         pay_time=now,
     )
     db.add(order)
@@ -181,19 +179,21 @@ async def get_member_orders(
     result = await db.execute(query)
     orders = result.scalars().all()
     
+    # 获取套餐名称映射
+    plan_names = {p["id"]: p["name"] for p in MEMBER_PLANS}
+    
     items = []
     for o in orders:
         items.append({
             "id": o.id,
             "order_no": o.order_no,
-            "plan_type": o.plan_type,
-            "plan_name": o.plan_name,
+            "plan_type": o.member_type,
+            "plan_name": plan_names.get(o.member_type, o.member_type),
             "original_price": float(o.original_price),
             "pay_amount": float(o.pay_amount),
             "pay_type": o.pay_type,
             "status": o.status,
-            "member_start_time": o.member_start_time.strftime("%Y-%m-%d") if o.member_start_time else None,
-            "member_end_time": o.member_end_time.strftime("%Y-%m-%d") if o.member_end_time else None,
+            "expire_time": o.expire_time.strftime("%Y-%m-%d") if o.expire_time else None,
             "pay_time": o.pay_time.strftime("%Y-%m-%d %H:%M:%S") if o.pay_time else None,
             "created_at": o.created_at.strftime("%Y-%m-%d %H:%M:%S") if o.created_at else None,
         })

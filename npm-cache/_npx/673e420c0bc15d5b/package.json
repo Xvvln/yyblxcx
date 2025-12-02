@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@sylphx/pdf-reader-mcp": "^2.0.3"
+  },
+  "_npx": {
+    "packages": [
+      "@sylphx/pdf-reader-mcp"
+    ]
+  }
+}

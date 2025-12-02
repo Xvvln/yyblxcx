@@ -31,3 +31,16 @@ export function getHealthStats(days: number = 7) {
   return request.get('/stats/health', { days })
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

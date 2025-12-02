@@ -222,6 +222,11 @@ function goSearch() {
 }
 
 onShow(() => {
+  if (typeof uni.getTabBar === 'function' && uni.getTabBar()) {
+    uni.getTabBar().setData({
+      selected: 2
+    })
+  }
   fetchCategories()
   fetchProducts(true)
   fetchBanners()
@@ -233,7 +238,7 @@ onShow(() => {
 .page {
   min-height: 100vh;
   background-color: #F5F5F7;
-  padding-bottom: 20px;
+  padding-bottom: 120px;
 }
 
 .search-header {
