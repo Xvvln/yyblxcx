@@ -1,10 +1,15 @@
 @echo off
 chcp 936 >nul
+setlocal enabledelayedexpansion
 :: 数据库导入脚本 - 营养不良筛查与健康管理系统
 
 echo ========================================
 echo 正在导入数据库...
 echo ========================================
+echo.
+
+:: 请求用户输入数据库密码
+set /p MYSQL_PWD=请输入MySQL root密码: 
 echo.
 
 :: 检查是否有备份文件
@@ -42,17 +47,17 @@ if /i not "!choice!"=="y" (
 
 :: 删除现有数据库（如果存在）
 echo [1/4] 删除现有数据库...
-mysql -u root -p1234 -e "DROP DATABASE IF EXISTS health_db;"
+mysql -u root -p%MYSQL_PWD% -e "DROP DATABASE IF EXISTS health_db;"
 
 if %errorlevel% neq 0 (
-    echo     删除数据库失败
+    echo     删除数据库失败，请检查密码是否正确
     pause
     exit /b 1
 )
 
 :: 创建新数据库
 echo [2/4] 创建新数据库...
-mysql -u root -p1234 -e "CREATE DATABASE health_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p%MYSQL_PWD% -e "CREATE DATABASE health_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 if %errorlevel% neq 0 (
     echo     创建数据库失败
@@ -62,7 +67,7 @@ if %errorlevel% neq 0 (
 
 :: 导入数据库结构和数据
 echo [3/4] 导入数据库结构和数据...
-mysql -u root -p1234 --default-character-set=utf8mb4 health_db < "%BACKUP_FILE%"
+mysql -u root -p%MYSQL_PWD% --default-character-set=utf8mb4 health_db < "%BACKUP_FILE%"
 
 if %errorlevel% neq 0 (
     echo     导入数据失败
@@ -72,7 +77,7 @@ if %errorlevel% neq 0 (
 
 :: 验证导入结果
 echo [4/4] 验证导入结果...
-mysql -u root -p1234 -e "USE health_db; SHOW TABLES;" > nul 2>&1
+mysql -u root -p%MYSQL_PWD% -e "USE health_db; SHOW TABLES;" > nul 2>&1
 
 if %errorlevel% equ 0 (
     echo.
