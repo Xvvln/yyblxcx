@@ -43,3 +43,4 @@ export function deleteFeedback(id: number) {
   return request.delete(`/feedback/${id}`)
 }
 
+

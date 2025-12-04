@@ -51,3 +51,4 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS total_checkin_days INT UNSIGNED DEFAU
 
 SELECT '迁移完成！已创建 user_settings 和 user_feedbacks 表' AS message;
 
+

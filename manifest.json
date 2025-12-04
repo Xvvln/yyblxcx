@@ -54,9 +54,17 @@
         "setting" : {
             "urlCheck" : false,
             "ignoreDevUnusedFiles": false,
-            "checkSiteMap": false
+            "checkSiteMap": false,
+            "minified": true,
+            "es6": true,
+            "postcss": true
         },
-        "usingComponents" : true
+        "usingComponents" : true,
+        "lazyCodeLoading": "requiredComponents",
+        "optimization": {
+            "subPackages": true
+        },
+        "__usePrivacyCheck__": true
     },
     "mp-alipay" : {
         "usingComponents" : true

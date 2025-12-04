@@ -4,6 +4,7 @@
     "dayjs": "^1.11.19",
     "lodash-es": "^4.17.21",
     "pinia": "^3.0.4",
+    "tdesign-miniprogram": "^1.11.2",
     "wot-design-uni": "^1.13.0"
   }
 }

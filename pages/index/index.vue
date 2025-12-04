@@ -8,9 +8,12 @@
     
     <!-- 自定义导航栏 -->
     <view class="nav-bar">
-      <view class="date-info">
-        <text class="date-text">{{ currentDate }}</text>
-        <text class="greeting">{{ greeting }}，{{ userStore.nickname }}</text>
+      <view class="user-header" @click="handleUserClick">
+        <image :src="userStore.userInfo?.avatar || '/static/placeholder/avatar.png'" class="nav-avatar" mode="aspectFill" />
+        <view class="header-text">
+          <text class="user-name">{{ userStore.nickname || '点击登录' }}</text>
+          <text class="greeting-text">{{ greeting }}</text>
+        </view>
       </view>
       <view class="nav-right" @click="navigateTo('/pages/message/index')">
         <wd-icon name="bell" size="22px" color="#1D1D1F"></wd-icon>
@@ -28,22 +31,6 @@
           </view>
         </swiper-item>
       </swiper>
-      
-      <!-- 签到卡片 -->
-      <view class="checkin-card" @click="handleCheckin">
-        <view class="checkin-left">
-          <view class="checkin-icon">
-            <wd-icon name="calendar-circle" size="24px" color="#0071e3"></wd-icon>
-          </view>
-          <view class="checkin-info">
-            <text class="checkin-title">{{ checkinStatus.is_checked_in ? '今日已签到' : '每日签到' }}</text>
-            <text class="checkin-desc">连续签到 {{ checkinStatus.continuous_days || 0 }} 天</text>
-          </view>
-        </view>
-        <view class="checkin-btn" :class="{ disabled: checkinStatus.is_checked_in }">
-          {{ checkinStatus.is_checked_in ? '已领取' : `+${(checkinStatus.base_reward || 5) * (checkinStatus.tomorrow_reward_multiplier || 1)}` }}
-        </view>
-      </view>
       
       <!-- 核心数据仪表盘 -->
       <view class="health-dashboard">
@@ -69,7 +56,7 @@
                 <circle 
                   cx="50" cy="50" r="40" 
                   fill="none" 
-                  stroke="#0071e3" 
+                  :stroke="bmiRingColor" 
                   stroke-width="8" 
                   stroke-linecap="round" 
                   stroke-dasharray="251.2" 
@@ -78,12 +65,12 @@
                 />
               </svg>
               <view class="ring-content">
-                <text class="bmi-val">{{ overview.latest_bmi || '--' }}</text>
-                <text class="bmi-label">BMI</text>
+                <text class="status-text" :class="bmiStatusClass">{{ bmiStatusText }}</text>
+                <text class="bmi-label">身体状态</text>
               </view>
             </view>
-            <view class="bmi-status">
-              <text class="status-text" :class="bmiStatusClass">{{ bmiStatusText }}</text>
+            <view class="bmi-advice">
+              <text>{{ bmiAdvice }}</text>
             </view>
           </view>
 
@@ -91,6 +78,11 @@
           <view class="stats-column">
             <!-- 身体数据 -->
             <view class="body-row">
+              <view class="stat-box">
+                <text class="label">BMI</text>
+                <text class="val">{{ overview.latest_bmi || '--' }}</text>
+              </view>
+              <view class="divider-v"></view>
               <view class="stat-box">
                 <text class="label">身高</text>
                 <view class="value-group">
@@ -108,24 +100,52 @@
               </view>
             </view>
 
-            <!-- 活动数据 -->
-            <view class="activity-row">
-              <view class="activity-item">
-                <view class="icon-circle sport">
-                  <wd-icon name="play-circle-fill" size="16px" color="#0071e3"></wd-icon>
+            <!-- 活动数据列表 -->
+            <view class="activity-column">
+              <!-- 筛查结果 -->
+              <view class="activity-item" @click="navigateTo('/pages/health/result')">
+                <view class="icon-circle health">
+                  <wd-icon name="check-circle-fill" size="16px" color="#34C759"></wd-icon>
                 </view>
                 <view class="info">
-                  <text class="label">运动</text>
-                  <text class="val">{{ overview.week_sport?.total_duration || 0 }}<text class="unit">分</text></text>
+                  <text class="label">筛查结果</text>
+                  <view class="right-val">
+                    <text class="val text-green">{{ overview.latest_screening?.result || '未筛查' }}</text>
+                    <wd-icon name="arrow-right" size="12px" color="#C7C7CC"></wd-icon>
+                  </view>
                 </view>
               </view>
+
+              <!-- 饮食摄入 -->
+              <view class="activity-item">
+                <view class="icon-circle food">
+                  <wd-icon name="fill" size="16px" color="#FF9500"></wd-icon>
+                </view>
+                <view class="info">
+                  <text class="label">今日摄入</text>
+                  <text class="val">{{ overview.today_calories_in || 0 }}<text class="unit">千卡</text></text>
+                </view>
+              </view>
+
+              <!-- 运动消耗 -->
               <view class="activity-item">
                 <view class="icon-circle fire">
                   <wd-icon name="hot-fill" size="16px" color="#FF3B30"></wd-icon>
                 </view>
                 <view class="info">
-                  <text class="label">消耗</text>
+                  <text class="label">运动消耗</text>
                   <text class="val">{{ overview.week_sport?.total_calories || 0 }}<text class="unit">千卡</text></text>
+                </view>
+              </view>
+
+              <!-- 运动时长 -->
+              <view class="activity-item">
+                <view class="icon-circle sport">
+                  <wd-icon name="play-circle-fill" size="16px" color="#0071e3"></wd-icon>
+                </view>
+                <view class="info">
+                  <text class="label">运动时长</text>
+                  <text class="val">{{ overview.week_sport?.total_duration || 0 }}<text class="unit">分</text></text>
                 </view>
               </view>
             </view>
@@ -164,6 +184,22 @@
             <wd-icon name="user" size="24px" color="#FF3B30"></wd-icon>
           </view>
           <text class="name">问医生</text>
+        </view>
+      </view>
+
+      <!-- 签到卡片 -->
+      <view class="checkin-card" @click="handleCheckin">
+        <view class="checkin-left">
+          <view class="checkin-icon">
+            <wd-icon name="calendar-circle" size="24px" color="#0071e3"></wd-icon>
+          </view>
+          <view class="checkin-info">
+            <text class="checkin-title">{{ checkinStatus.is_checked_in ? '今日已签到' : '每日签到' }}</text>
+            <text class="checkin-desc">连续签到 {{ checkinStatus.continuous_days || 0 }} 天</text>
+          </view>
+        </view>
+        <view class="checkin-btn" :class="{ disabled: checkinStatus.is_checked_in }">
+          {{ checkinStatus.is_checked_in ? '已领取' : `+${(checkinStatus.base_reward || 5) * (checkinStatus.tomorrow_reward_multiplier || 1)}` }}
         </view>
       </view>
       
@@ -270,9 +306,27 @@ const bmiStatusText = computed(() => {
   const bmi = Number(overview.value.latest_bmi)
   if (!bmi) return '未知'
   if (bmi < 18.5) return '偏瘦'
-  if (bmi < 24) return '正常'
+  if (bmi < 24) return '健康'
   if (bmi < 28) return '偏胖'
   return '肥胖'
+})
+
+const bmiAdvice = computed(() => {
+  const bmi = Number(overview.value.latest_bmi)
+  if (!bmi) return '请完善信息'
+  if (bmi < 18.5) return '注意补充营养'
+  if (bmi < 24) return '继续保持哦'
+  if (bmi < 28) return '适当多运动'
+  return '科学减重'
+})
+
+const bmiRingColor = computed(() => {
+  const bmi = Number(overview.value.latest_bmi)
+  if (!bmi) return '#E5E5EA'
+  if (bmi < 18.5) return '#FF9500'
+  if (bmi < 24) return '#34C759'
+  if (bmi < 28) return '#FF9500'
+  return '#FF3B30'
 })
 
 const bmiStatusClass = computed(() => {
@@ -283,6 +337,14 @@ const bmiStatusClass = computed(() => {
   if (bmi < 28) return 'fat'
   return 'obese'
 })
+
+function handleUserClick() {
+  if (!userStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/login/index' })
+  } else {
+    uni.switchTab({ url: '/pages/user/index' })
+  }
+}
 
 // 页面跳转
 function navigateTo(url: string) {
@@ -480,20 +542,35 @@ onShow(() => {
   position: relative;
   z-index: 10;
   
-  .date-info {
+  .user-header {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 12px;
     
-    .date-text {
-      font-size: 12px;
-      color: #86868B;
-      font-weight: 500;
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     
-    .greeting {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1D1D1F;
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      
+      .user-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1D1D1F;
+        line-height: 1.2;
+      }
+      
+      .greeting-text {
+        font-size: 11px;
+        color: #86868B;
+      }
     }
   }
   
@@ -666,12 +743,13 @@ onShow(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     
     .ring-container {
       width: 100px;
       height: 100px;
       position: relative;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
 
       .bmi-ring {
         width: 100%;
@@ -688,12 +766,17 @@ onShow(() => {
         flex-direction: column;
         align-items: center;
 
-        .bmi-val {
-          font-size: 24px;
+        .status-text {
+          font-size: 20px;
           font-weight: 700;
-          color: #1D1D1F;
-          line-height: 1;
+          line-height: 1.2;
           letter-spacing: -0.5px;
+          
+          &.thin { color: #FF9500; }
+          &.normal { color: #34C759; }
+          &.fat { color: #FF9500; }
+          &.obese { color: #FF3B30; }
+          &.unknown { color: #86868B; }
         }
 
         .bmi-label {
@@ -705,20 +788,16 @@ onShow(() => {
       }
     }
 
-    .bmi-status {
+    .bmi-advice {
       background: #F5F5F7;
       padding: 4px 12px;
       border-radius: 12px;
+      margin-top: 4px;
 
-      .status-text {
-        font-size: 12px;
-        font-weight: 600;
-        
-        &.thin { color: #FF9500; }
-        &.normal { color: #34C759; }
-        &.fat { color: #FF9500; }
-        &.obese { color: #FF3B30; }
-        &.unknown { color: #86868B; }
+      text {
+        font-size: 11px;
+        font-weight: 500;
+        color: #86868B;
       }
     }
   }
@@ -735,7 +814,7 @@ onShow(() => {
       align-items: center;
       background: #F5F5F7;
       border-radius: 16px;
-      padding: 12px 16px;
+      padding: 12px 8px;
       
       .stat-box {
         flex: 1;
@@ -749,19 +828,25 @@ onShow(() => {
           margin-bottom: 4px;
         }
 
+        .val {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1D1D1F;
+        }
+
         .value-group {
           display: flex;
           align-items: baseline;
-          gap: 2px;
+          gap: 1px;
 
           .val {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: #1D1D1F;
           }
 
           .unit {
-            font-size: 11px;
+            font-size: 10px;
             color: #86868B;
           }
         }
@@ -771,15 +856,15 @@ onShow(() => {
         width: 1px;
         height: 20px;
         background: rgba(0,0,0,0.06);
-        margin: 0 12px;
+        margin: 0 4px;
       }
     }
 
-    .activity-row {
+    .activity-column {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      padding: 4px 0;
+      padding-top: 4px;
 
       .activity-item {
         display: flex;
@@ -793,9 +878,12 @@ onShow(() => {
           display: flex;
           align-items: center;
           justify-content: center;
+          flex-shrink: 0;
 
           &.sport { background: rgba(0, 113, 227, 0.1); }
           &.fire { background: rgba(255, 59, 48, 0.1); }
+          &.health { background: rgba(52, 199, 89, 0.1); }
+          &.food { background: rgba(255, 149, 0, 0.1); }
         }
 
         .info {
@@ -805,18 +893,27 @@ onShow(() => {
           align-items: center;
           border-bottom: 0.5px solid rgba(0,0,0,0.05);
           padding-bottom: 8px;
+          min-height: 32px;
 
           .label {
             font-size: 13px;
             color: #1D1D1F;
             font-weight: 500;
           }
+          
+          .right-val {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
 
           .val {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #1D1D1F;
             font-family: "SF Pro Rounded", sans-serif;
+            
+            &.text-green { color: #34C759; }
 
             .unit {
               font-size: 11px;
