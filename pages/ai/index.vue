@@ -6,29 +6,27 @@
       class="chat-list" 
       :scroll-top="scrollTop"
       :scroll-into-view="scrollIntoView"
+      :scroll-with-animation="true"
     >
       <!-- 欢迎消息 -->
       <view class="welcome-card" v-if="messages.length === 0">
         <view class="avatar-wrap">
           <view class="ai-avatar">
-            <wd-icon name="robot" size="32px" color="#0071e3"></wd-icon>
+            <wd-icon name="robot" size="36px" color="#0071e3"></wd-icon>
           </view>
         </view>
         <text class="title">我是您的健康AI助手</text>
         <text class="desc">有任何健康问题都可以问我，我会为您提供专业的建议</text>
         
         <view class="quick-questions">
-          <view class="question-item" @click="sendQuickQuestion('如何制定健康的减肥计划？')">
-            如何制定健康的减肥计划？
-          </view>
-          <view class="question-item" @click="sendQuickQuestion('每天应该喝多少水？')">
-            每天应该喝多少水？
-          </view>
-          <view class="question-item" @click="sendQuickQuestion('运动后应该吃什么？')">
-            运动后应该吃什么？
-          </view>
-          <view class="question-item" @click="sendQuickQuestion('如何改善睡眠质量？')">
-            如何改善睡眠质量？
+          <view 
+            class="question-item" 
+            v-for="(q, idx) in quickQuestions" 
+            :key="idx"
+            @click="sendQuickQuestion(q)"
+          >
+            <text>{{ q }}</text>
+            <wd-icon name="arrow-right" size="14px" color="#C7C7CC"></wd-icon>
           </view>
         </view>
       </view>
@@ -45,10 +43,12 @@
           <view v-if="msg.role === 'assistant'" class="ai-avatar-small">
             <wd-icon name="robot" size="20px" color="#0071e3"></wd-icon>
           </view>
-          <image v-else :src="userStore.avatar || '/static/placeholder/avatar.png'" class="user-avatar" />
+          <image v-else :src="userStore.userInfo?.avatar || '/static/placeholder/avatar.png'" class="user-avatar" mode="aspectFill" />
         </view>
-        <view class="content">
-          <text class="text">{{ msg.content }}</text>
+        <view class="content-wrapper">
+          <view class="bubble">
+            <text class="text" user-select>{{ msg.content }}</text>
+          </view>
           <text class="time">{{ formatTime(msg.time) }}</text>
         </view>
       </view>
@@ -60,11 +60,13 @@
             <wd-icon name="robot" size="20px" color="#0071e3"></wd-icon>
           </view>
         </view>
-        <view class="content">
-          <view class="typing-indicator">
-            <view class="dot"></view>
-            <view class="dot"></view>
-            <view class="dot"></view>
+        <view class="content-wrapper">
+          <view class="bubble loading-bubble">
+            <view class="typing-indicator">
+              <view class="dot"></view>
+              <view class="dot"></view>
+              <view class="dot"></view>
+            </view>
           </view>
         </view>
       </view>
@@ -81,11 +83,12 @@
           :auto-height="true"
           :maxlength="500"
           :show-confirm-bar="false"
+          :cursor-spacing="20"
           @confirm="sendMessage"
         />
       </view>
       <view class="send-btn" :class="{ active: inputText.trim() && !loading }" @click="sendMessage">
-        <wd-icon name="send" size="22px" :color="inputText.trim() && !loading ? '#FFFFFF' : '#C7C7CC'"></wd-icon>
+        <wd-icon name="send" size="20px" :color="inputText.trim() && !loading ? '#FFFFFF' : '#C7C7CC'"></wd-icon>
       </view>
     </view>
   </view>
@@ -109,6 +112,13 @@ const loading = ref(false)
 const scrollTop = ref(0)
 const scrollIntoView = ref('')
 const scrollAnchor = ref('scroll-anchor')
+
+const quickQuestions = [
+  '如何制定健康的减肥计划？',
+  '每天应该喝多少水？',
+  '运动后应该吃什么？',
+  '如何改善睡眠质量？'
+]
 
 function sendQuickQuestion(question: string) {
   inputText.value = question
@@ -170,7 +180,7 @@ function scrollToBottom() {
     scrollIntoView.value = ''
     setTimeout(() => {
       scrollIntoView.value = scrollAnchor.value
-    }, 50)
+    }, 100)
   })
 }
 
@@ -191,34 +201,36 @@ function formatTime(time: Date) {
 
 .chat-list {
   flex: 1;
-  padding: 16px;
-  padding-bottom: 100px;
+  box-sizing: border-box;
+  padding: 20px 16px;
 }
 
 .welcome-card {
   background: #FFFFFF;
-  border-radius: 20px;
-  padding: 32px 24px;
+  border-radius: 24px;
+  padding: 40px 24px;
   text-align: center;
-  margin-bottom: 20px;
+  margin: 20px 4px 40px; // Add margin to prevent edge touching
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
   
   .avatar-wrap {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
   
   .ai-avatar {
-    width: 64px;
-    height: 64px;
-    background: #E8F4FD;
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #E8F4FD 0%, #F2F8FD 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.1);
   }
   
   .title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #1D1D1F;
     display: block;
@@ -229,32 +241,45 @@ function formatTime(time: Date) {
     font-size: 14px;
     color: #86868B;
     display: block;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
+    line-height: 1.5;
   }
   
   .quick-questions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
     
     .question-item {
       background: #F5F5F7;
-      padding: 10px 16px;
-      border-radius: 20px;
-      font-size: 13px;
+      padding: 16px 20px;
+      border-radius: 16px;
+      font-size: 14px;
       color: #1D1D1F;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+      
+      &:active {
+        background: #E5E5EA;
+        transform: scale(0.98);
+      }
     }
   }
 }
 
 .message-item {
   display: flex;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  padding: 0 4px; // Safety padding
   
   .avatar {
     margin-right: 12px;
     flex-shrink: 0;
+    align-self: flex-end; // Align avatar to bottom of message
+    margin-bottom: 4px;
     
     .ai-avatar-small {
       width: 36px;
@@ -270,28 +295,37 @@ function formatTime(time: Date) {
       width: 36px;
       height: 36px;
       border-radius: 50%;
+      background: #F5F5F7;
     }
   }
   
-  .content {
-    max-width: 75%;
+  .content-wrapper {
+    max-width: 72%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     
-    .text {
+    .bubble {
       background: #FFFFFF;
-      padding: 12px 16px;
-      border-radius: 0 16px 16px 16px;
-      font-size: 15px;
-      color: #1D1D1F;
-      line-height: 1.5;
-      display: block;
-      word-break: break-all;
+      padding: 14px 18px;
+      border-radius: 18px 18px 18px 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      
+      .text {
+        font-size: 16px;
+        color: #1D1D1F;
+        line-height: 1.5;
+        display: block;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
     }
     
     .time {
       font-size: 11px;
-      color: #86868B;
-      margin-top: 4px;
-      display: block;
+      color: #AEAEB2;
+      margin-top: 6px;
+      margin-left: 4px;
     }
   }
   
@@ -303,68 +337,88 @@ function formatTime(time: Date) {
       margin-left: 12px;
     }
     
-    .content {
-      .text {
+    .content-wrapper {
+      align-items: flex-end;
+      
+      .bubble {
         background: #0071e3;
-        color: #FFFFFF;
-        border-radius: 16px 0 16px 16px;
+        border-radius: 18px 18px 4px 18px;
+        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
+        
+        .text {
+          color: #FFFFFF;
+        }
       }
       
       .time {
-        text-align: right;
+        margin-left: 0;
+        margin-right: 4px;
       }
     }
   }
 }
 
-.typing-indicator {
-  background: #FFFFFF;
-  padding: 16px 20px;
-  border-radius: 0 16px 16px 16px;
+.loading-bubble {
+  padding: 16px 20px !important;
   display: flex;
-  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 5px;
   
   .dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: #86868B;
     border-radius: 50%;
-    animation: typing 1.4s infinite;
+    animation: typing 1.4s infinite ease-in-out both;
     
-    &:nth-child(2) { animation-delay: 0.2s; }
-    &:nth-child(3) { animation-delay: 0.4s; }
+    &:nth-child(1) { animation-delay: -0.32s; }
+    &:nth-child(2) { animation-delay: -0.16s; }
+    &:nth-child(3) { animation-delay: 0; }
   }
 }
 
 @keyframes typing {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-8px); }
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
 }
 
 .scroll-anchor {
   height: 1px;
+  width: 100%;
 }
 
 .footer {
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
   padding: 12px 16px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  border-top: 0.5px solid rgba(0,0,0,0.05);
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
   
   .input-wrap {
     flex: 1;
     background: #F5F5F7;
-    border-radius: 20px;
-    padding: 10px 16px;
+    border-radius: 24px;
+    padding: 12px 18px;
+    min-height: 24px;
     
     textarea {
       width: 100%;
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1.4;
       max-height: 100px;
+      padding: 0;
     }
   }
   
@@ -377,24 +431,17 @@ function formatTime(time: Date) {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: all 0.2s;
     
     &.active {
       background: #0071e3;
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+      transform: scale(1.05);
+    }
+    
+    &:active {
+      transform: scale(0.95);
     }
   }
 }
 </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -175,3 +175,73 @@ export function deleteReminder(id: number) {
   return request.delete(`/reminder/${id}`)
 }
 
+// ============ 用户设置相关接口 ============
+
+/**
+ * 获取用户设置
+ */
+export function getUserSettings() {
+  return request.get('/settings')
+}
+
+/**
+ * 更新用户设置
+ */
+export function updateUserSettings(data: {
+  share_health_data?: number
+  public_profile?: number
+  personalized?: number
+  elderly_mode?: number
+  notification_enabled?: number
+}) {
+  return request.put('/settings', data)
+}
+
+/**
+ * 发送验证码
+ */
+export function sendVerificationCode(phone: string) {
+  return request.post(`/settings/send-code?phone=${phone}`)
+}
+
+/**
+ * 绑定手机号
+ */
+export function bindPhone(data: { phone: string; code: string }) {
+  return request.post('/settings/bind-phone', data)
+}
+
+/**
+ * 解绑手机号
+ */
+export function unbindPhone() {
+  return request.post('/settings/unbind-phone')
+}
+
+/**
+ * 注销账号
+ */
+export function deleteAccount() {
+  return request.post('/settings/delete-account')
+}
+
+// ============ 用户反馈相关接口 ============
+
+/**
+ * 提交反馈
+ */
+export function submitFeedback(data: {
+  content: string
+  images?: string[]
+  contact?: string
+}) {
+  return request.post('/feedback', data)
+}
+
+/**
+ * 获取我的反馈列表
+ */
+export function getFeedbackList(params?: { page?: number; page_size?: number }) {
+  return request.get('/feedback/list', params)
+}
+

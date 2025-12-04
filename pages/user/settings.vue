@@ -77,14 +77,10 @@ function toggleElderlyMode({ value }: { value: boolean }) {
 function navigateTo(page: string) {
   switch (page) {
     case 'account':
-      uni.showToast({ title: '账号管理', icon: 'none' })
+      uni.navigateTo({ url: '/pages/user/account-security' })
       break
     case 'privacy':
-      uni.showModal({
-        title: '隐私设置',
-        content: '您可以管理个人隐私数据的展示权限',
-        showCancel: false
-      })
+      uni.navigateTo({ url: '/pages/user/privacy-settings' })
       break
     case 'notification':
       uni.openSetting({
@@ -101,23 +97,10 @@ function navigateTo(page: string) {
       uni.navigateTo({ url: '/pages/help/index?type=privacy' })
       break
     case 'about':
-      uni.showModal({
-        title: '关于我们',
-        content: '营养不良筛查与健康管理小程序\n版本：1.0.0\n\n致力于为用户提供专业的健康管理服务',
-        showCancel: false
-      })
+      uni.navigateTo({ url: '/pages/user/about' })
       break
     case 'feedback':
-      uni.showModal({
-        title: '意见反馈',
-        editable: true,
-        placeholderText: '请输入您的建议或问题',
-        success: (res) => {
-          if (res.confirm && res.content) {
-            uni.showToast({ title: '感谢您的反馈', icon: 'success' })
-          }
-        }
-      })
+      uni.navigateTo({ url: '/pages/user/feedback' })
       break
     case 'help':
       uni.navigateTo({ url: '/pages/help/index' })

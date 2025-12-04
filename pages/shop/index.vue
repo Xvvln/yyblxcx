@@ -222,11 +222,6 @@ function goSearch() {
 }
 
 onShow(() => {
-  if (typeof uni.getTabBar === 'function' && uni.getTabBar()) {
-    uni.getTabBar().setData({
-      selected: 2
-    })
-  }
   fetchCategories()
   fetchProducts(true)
   fetchBanners()

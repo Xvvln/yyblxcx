@@ -131,8 +131,8 @@ function startConsult() {
     content: `咨询费用：¥${doctor.value?.consult_price || 30}/次\n确定开始咨询？`,
     success: (res) => {
       if (res.confirm) {
-        // 跳转到AI聊天或咨询页面
-        uni.navigateTo({ url: '/pages/ai/index' })
+        // 跳转到在线咨询页面
+        uni.navigateTo({ url: `/pages/doctor/chat?id=${doctorId.value}` })
       }
     }
   })

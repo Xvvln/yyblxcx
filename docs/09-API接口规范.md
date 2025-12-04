@@ -209,6 +209,8 @@
 | GET | `/article/list` | 科普文章列表 |
 | GET | `/article/{id}` | 文章详情 |
 
+> **医生在线咨询**：医患聊天功能复用私聊模块接口，以医生ID作为 `receiver_id` 进行消息收发。
+
 ### 上传模块
 
 | 方法 | 路径 | 说明 |
@@ -274,6 +276,16 @@
 | GET | `/stats/user` | 用户统计 |
 | GET | `/stats/order` | 订单统计 |
 | GET | `/stats/health` | 健康数据统计 |
+
+### 反馈管理
+
+| 方法 | 路径 | 说明 |
+|------|-----|------|
+| GET | `/feedback/list` | 反馈列表（分页） |
+| GET | `/feedback/{id}` | 反馈详情 |
+| PUT | `/feedback/{id}` | 更新反馈状态 |
+| POST | `/feedback/{id}/reply` | 回复反馈 |
+| DELETE | `/feedback/{id}` | 删除反馈 |
 
 ### 系统设置
 
@@ -393,5 +405,75 @@
 |------|-----|------|
 | PUT | `/category/{id}` | 编辑分类 |
 | DELETE | `/category/{id}` | 删除分类 |
+
+### 用户设置模块
+
+| 方法 | 路径 | 说明 |
+|------|-----|------|
+| GET | `/settings` | 获取用户设置 |
+| PUT | `/settings` | 更新用户设置 |
+| POST | `/settings/send-code` | 发送手机验证码 |
+| POST | `/settings/bind-phone` | 绑定手机号 |
+| POST | `/settings/unbind-phone` | 解绑手机号 |
+| POST | `/settings/delete-account` | 注销账号 |
+
+**请求示例 - 更新设置**：
+```json
+{
+  "share_health_data": 1,
+  "public_profile": 1,
+  "personalized": 1,
+  "elderly_mode": 0,
+  "notification_enabled": 1
+}
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "设置已更新",
+  "data": {
+    "id": 1,
+    "user_id": 50,
+    "share_health_data": 1,
+    "public_profile": 1,
+    "personalized": 1,
+    "elderly_mode": 0,
+    "notification_enabled": 1
+  }
+}
+```
+
+### 用户反馈模块
+
+| 方法 | 路径 | 说明 |
+|------|-----|------|
+| POST | `/feedback` | 提交反馈 |
+| GET | `/feedback/list` | 获取我的反馈列表 |
+
+**请求示例 - 提交反馈**：
+```json
+{
+  "content": "建议增加运动数据导出功能",
+  "images": ["/uploads/feedback/1.jpg"],
+  "contact": "13800138000"
+}
+```
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "反馈提交成功，感谢您的建议",
+  "data": {
+    "id": 1,
+    "user_id": 50,
+    "content": "建议增加运动数据导出功能",
+    "images": ["/uploads/feedback/1.jpg"],
+    "contact": "13800138000",
+    "status": 0
+  }
+}
 
 

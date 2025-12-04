@@ -93,6 +93,41 @@ class UserHealthProfile(Base):
     user: Mapped["User"] = relationship("User", back_populates="health_profile")
 
 
+class UserSettings(Base):
+    """用户设置表"""
+    __tablename__ = "user_settings"
+    
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), unique=True, nullable=False, comment="用户ID")
+    
+    # 隐私设置
+    share_health_data: Mapped[int] = mapped_column(Integer, default=0, comment="向医生展示健康数据: 0否 1是")
+    public_profile: Mapped[int] = mapped_column(Integer, default=1, comment="允许陌生人查看动态: 0否 1是")
+    personalized: Mapped[int] = mapped_column(Integer, default=1, comment="个性化推荐: 0否 1是")
+    
+    # 通用设置
+    elderly_mode: Mapped[int] = mapped_column(Integer, default=0, comment="长辈模式: 0否 1是")
+    notification_enabled: Mapped[int] = mapped_column(Integer, default=1, comment="消息通知: 0否 1是")
+    
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, comment="创建时间")
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now, comment="更新时间")
+
+
+class UserFeedback(Base):
+    """用户反馈表"""
+    __tablename__ = "user_feedbacks"
+    
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id"), nullable=False, index=True, comment="用户ID")
+    content: Mapped[str] = mapped_column(Text, nullable=False, comment="反馈内容")
+    images: Mapped[Optional[list]] = mapped_column(JSON, nullable=True, comment="反馈图片")
+    contact: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, comment="联系方式")
+    status: Mapped[int] = mapped_column(Integer, default=0, comment="状态: 0待处理 1已处理 2已回复")
+    reply: Mapped[Optional[str]] = mapped_column(Text, nullable=True, comment="回复内容")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, comment="创建时间")
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now, comment="更新时间")
+
+
 class UserAddress(Base):
     """用户收货地址表"""
     __tablename__ = "user_addresses"

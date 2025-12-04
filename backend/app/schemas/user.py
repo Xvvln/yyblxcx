@@ -124,6 +124,61 @@ class UserAddressUpdate(BaseModel):
     is_default: Optional[int] = Field(None, ge=0, le=1, description="是否默认")
 
 
+class UserSettingsSchema(BaseModel):
+    """用户设置"""
+    id: int
+    user_id: int
+    share_health_data: int = 0
+    public_profile: int = 1
+    personalized: int = 1
+    elderly_mode: int = 0
+    notification_enabled: int = 1
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserSettingsUpdate(BaseModel):
+    """更新用户设置"""
+    share_health_data: Optional[int] = Field(None, ge=0, le=1, description="向医生展示健康数据")
+    public_profile: Optional[int] = Field(None, ge=0, le=1, description="允许陌生人查看动态")
+    personalized: Optional[int] = Field(None, ge=0, le=1, description="个性化推荐")
+    elderly_mode: Optional[int] = Field(None, ge=0, le=1, description="长辈模式")
+    notification_enabled: Optional[int] = Field(None, ge=0, le=1, description="消息通知")
+
+
+class UserFeedbackCreate(BaseModel):
+    """创建反馈"""
+    content: str = Field(..., min_length=1, max_length=1000, description="反馈内容")
+    images: Optional[list] = Field(None, description="反馈图片")
+    contact: Optional[str] = Field(None, max_length=100, description="联系方式")
+
+
+class UserFeedbackSchema(BaseModel):
+    """用户反馈"""
+    id: int
+    user_id: int
+    content: str
+    images: Optional[list] = None
+    contact: Optional[str] = None
+    status: int = 0
+    reply: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class BindPhoneRequest(BaseModel):
+    """绑定手机号请求"""
+    phone: str = Field(..., pattern=r"^1[3-9]\d{9}$", description="手机号")
+    code: str = Field(..., min_length=4, max_length=6, description="验证码")
+
+
+
+
 
 
 

@@ -175,11 +175,6 @@ function handleLogout() {
 }
 
 onShow(() => {
-  if (typeof uni.getTabBar === 'function' && uni.getTabBar()) {
-    uni.getTabBar().setData({
-      selected: 3
-    })
-  }
   if (userStore.isLoggedIn) {
     userStore.fetchUserInfo()
   }

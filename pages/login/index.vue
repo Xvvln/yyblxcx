@@ -195,13 +195,12 @@ async function handleWxLogin() {
       uni.hideLoading()
       uni.showToast({ title: '登录成功', icon: 'success' })
       
-      // 3. 跳转逻辑：新用户或未完善信息 -> 健康筛查；老用户 -> 首页
+      // 3. 跳转逻辑：新用户或未完善信息 -> 欢迎页；老用户 -> 首页
       setTimeout(() => {
-        // 这里简单判断：如果是新用户，或者没有身高体重数据，就去完善信息
-        // 注意：后端返回的 is_new_user 是最准确的判断
+        // 后端返回的 is_new_user 是最准确的判断
         // 也可以检查 userStore.userInfo.height/weight
         if (data.is_new_user || !userStore.userInfo?.height) {
-           uni.redirectTo({ url: '/pages/health/basic-info' })
+           uni.redirectTo({ url: '/pages/onboarding/welcome' })
         } else {
            uni.switchTab({ url: '/pages/index/index' })
         }

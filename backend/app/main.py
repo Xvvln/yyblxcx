@@ -44,6 +44,7 @@ from app.api.v1 import (
     food_library,
     sport_goal,
     stats,
+    settings as user_settings,
 )
 from app.api.admin import (
     auth as admin_auth,
@@ -53,6 +54,7 @@ from app.api.admin import (
     order as admin_order,
     stats as admin_stats,
     setting as admin_setting,
+    feedback as admin_feedback,
 )
 
 
@@ -113,6 +115,8 @@ app.include_router(checkin.router, prefix="/api/v1", tags=["签到"])
 app.include_router(food_library.router, prefix="/api/v1", tags=["食物库"])
 app.include_router(sport_goal.router, prefix="/api/v1", tags=["运动目标"])
 app.include_router(stats.router, prefix="/api/v1", tags=["数据统计"])
+app.include_router(user_settings.router, prefix="/api/v1", tags=["用户设置"])
+app.include_router(user_settings.feedback_router, prefix="/api/v1", tags=["用户反馈"])
 
 # 注册路由 - Web管理端 API
 app.include_router(admin_auth.router, prefix="/api/admin/v1", tags=["管理员认证"])
@@ -122,6 +126,7 @@ app.include_router(admin_product.router, prefix="/api/admin/v1", tags=["商品�
 app.include_router(admin_order.router, prefix="/api/admin/v1", tags=["订单管理"])
 app.include_router(admin_stats.router, prefix="/api/admin/v1", tags=["数据统计"])
 app.include_router(admin_setting.router, prefix="/api/admin/v1", tags=["系统设置"])
+app.include_router(admin_feedback.router, prefix="/api/admin/v1", tags=["反馈管理"])
 
 
 @app.get("/")

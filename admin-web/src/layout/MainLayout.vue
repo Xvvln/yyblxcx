@@ -99,7 +99,8 @@ import {
   Bell,
   ArrowDown,
   SwitchButton,
-  Refresh
+  Refresh,
+  ChatDotRound
 } from '@element-plus/icons-vue'
 import { useAdminStore } from '@/store/admin'
 
@@ -113,6 +114,7 @@ const menuItems = [
   { title: '内容审核', path: '/content', icon: Document },
   { title: '商品管理', path: '/products', icon: Goods },
   { title: '订单管理', path: '/orders', icon: List },
+  { title: '反馈管理', path: '/feedback', icon: ChatDotRound },
   { title: '系统设置', path: '/settings', icon: Setting },
 ]
 

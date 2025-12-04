@@ -8,6 +8,11 @@ export * from './product'
 export * from './order'
 export * from './stats'
 export * from './setting'
+export * from './feedback'
+
+
+
+
 
 
 

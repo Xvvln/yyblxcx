@@ -64,15 +64,17 @@ password: 1234
 
 ---
 
-## 数据表统计（共 38 张）
+## 数据表统计（共 40 张）
 
-### 用户模块（3张）
+### 用户模块（5张）
 
 | 表名 | 说明 |
 |-----|------|
 | users | 用户基础信息（含余额、积分、粉丝数） |
 | user_health_profiles | 用户健康档案 |
 | user_addresses | 收货地址 |
+| user_settings | 用户设置（隐私、通知等） |
+| user_feedbacks | 用户反馈 |
 
 ### 健康筛查模块（2张）
 
@@ -165,7 +167,7 @@ password: 1234
 
 | 文件 | 内容 |
 |-----|------|
-| 01-用户模块.sql | users, user_health_profiles, user_addresses |
+| 01-用户模块.sql | users, user_health_profiles, user_addresses, user_settings, user_feedbacks |
 | 02-健康筛查模块.sql | health_screenings, health_reminders |
 | 03-运动模块.sql | sport_records, sport_goals |
 | 04-饮食模块.sql | food_records, food_library |
@@ -175,6 +177,7 @@ password: 1234
 | 08-积分任务模块.sql | 积分、打卡、任务相关表 |
 | 09-系统管理模块.sql | 管理员、通知、轮播图、配置相关表 |
 | **init-all.sql** | 完整初始化脚本（按依赖顺序） |
+| migrate_add_settings_feedback.sql | 迁移脚本：新增用户设置和反馈表 |
 
 ---
 
@@ -189,3 +192,11 @@ mysql> source docs/数据库设计/init-all.sql;
 ```
 
 **注意**：数据库已于 2025-11-27 初始化完成，无需重复执行。
+
+---
+
+## 迁移记录
+
+| 日期 | 迁移文件 | 说明 |
+|-----|---------|------|
+| 2025-12-03 | migrate_add_settings_feedback.sql | 新增 user_settings、user_feedbacks 表 |

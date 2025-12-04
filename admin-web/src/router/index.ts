@@ -40,6 +40,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: '订单管理' }
       },
       {
+        path: 'feedback',
+        name: 'Feedback',
+        component: () => import('@/views/FeedbackList.vue'),
+        meta: { title: '反馈管理' }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/Settings.vue'),

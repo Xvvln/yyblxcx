@@ -45,28 +45,90 @@
         </view>
       </view>
       
-      <!-- 核心数据大卡片 -->
-      <view class="health-hero-card">
-        <view class="score-circle">
-          <view class="score-inner">
-            <text class="score-val">{{ overview.latest_bmi || '--' }}</text>
-            <text class="score-label">BMI</text>
+      <!-- 核心数据仪表盘 -->
+      <view class="health-dashboard">
+        <view class="dashboard-header">
+          <view class="header-left">
+            <text class="title">健康概览</text>
+            <text class="subtitle">今日数据</text>
           </view>
-          <svg class="progress-ring" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="6" />
-            <circle cx="50" cy="50" r="45" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-dasharray="283" :stroke-dashoffset="283 - (283 * Math.min((overview.latest_bmi || 0) / 30 * 100, 100) / 100)" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          </svg>
+          <view class="header-right" @click="navigateTo('/pages/health/index')">
+            <text>详情</text>
+            <wd-icon name="arrow-right" size="14px" color="#86868B"></wd-icon>
+          </view>
         </view>
-        
-        <view class="hero-stats">
-          <view class="stat-item">
-            <text class="stat-val">{{ overview.week_sport?.total_duration || 0 }}</text>
-            <text class="stat-key">本周运动(分钟)</text>
+
+        <view class="dashboard-content">
+          <!-- 左侧：BMI 状态 -->
+          <view class="bmi-card">
+            <view class="ring-container">
+              <svg class="bmi-ring" viewBox="0 0 100 100">
+                <!-- 背景圆环 -->
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#F2F2F7" stroke-width="8" stroke-linecap="round" />
+                <!-- 进度圆环 -->
+                <circle 
+                  cx="50" cy="50" r="40" 
+                  fill="none" 
+                  stroke="#0071e3" 
+                  stroke-width="8" 
+                  stroke-linecap="round" 
+                  stroke-dasharray="251.2" 
+                  :stroke-dashoffset="251.2 - (251.2 * Math.min((overview.latest_bmi || 0) / 35, 1))" 
+                  transform="rotate(-90 50 50)"
+                />
+              </svg>
+              <view class="ring-content">
+                <text class="bmi-val">{{ overview.latest_bmi || '--' }}</text>
+                <text class="bmi-label">BMI</text>
+              </view>
+            </view>
+            <view class="bmi-status">
+              <text class="status-text" :class="bmiStatusClass">{{ bmiStatusText }}</text>
+            </view>
           </view>
-          <view class="divider"></view>
-          <view class="stat-item">
-            <text class="stat-val">{{ overview.week_sport?.total_calories || 0 }}</text>
-            <text class="stat-key">消耗(kcal)</text>
+
+          <!-- 右侧：身体数据与活动 -->
+          <view class="stats-column">
+            <!-- 身体数据 -->
+            <view class="body-row">
+              <view class="stat-box">
+                <text class="label">身高</text>
+                <view class="value-group">
+                  <text class="val">{{ userStore.userInfo?.height || '--' }}</text>
+                  <text class="unit">cm</text>
+                </view>
+              </view>
+              <view class="divider-v"></view>
+              <view class="stat-box">
+                <text class="label">体重</text>
+                <view class="value-group">
+                  <text class="val">{{ userStore.userInfo?.weight || '--' }}</text>
+                  <text class="unit">kg</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 活动数据 -->
+            <view class="activity-row">
+              <view class="activity-item">
+                <view class="icon-circle sport">
+                  <wd-icon name="play-circle-fill" size="16px" color="#0071e3"></wd-icon>
+                </view>
+                <view class="info">
+                  <text class="label">运动</text>
+                  <text class="val">{{ overview.week_sport?.total_duration || 0 }}<text class="unit">分</text></text>
+                </view>
+              </view>
+              <view class="activity-item">
+                <view class="icon-circle fire">
+                  <wd-icon name="hot-fill" size="16px" color="#FF3B30"></wd-icon>
+                </view>
+                <view class="info">
+                  <text class="label">消耗</text>
+                  <text class="val">{{ overview.week_sport?.total_calories || 0 }}<text class="unit">千卡</text></text>
+                </view>
+              </view>
+            </view>
           </view>
         </view>
       </view>
@@ -202,6 +264,24 @@ const greeting = computed(() => {
   if (hour < 17) return '下午好'
   if (hour < 19) return '傍晚好'
   return '晚上好'
+})
+
+const bmiStatusText = computed(() => {
+  const bmi = Number(overview.value.latest_bmi)
+  if (!bmi) return '未知'
+  if (bmi < 18.5) return '偏瘦'
+  if (bmi < 24) return '正常'
+  if (bmi < 28) return '偏胖'
+  return '肥胖'
+})
+
+const bmiStatusClass = computed(() => {
+  const bmi = Number(overview.value.latest_bmi)
+  if (!bmi) return 'unknown'
+  if (bmi < 18.5) return 'thin'
+  if (bmi < 24) return 'normal'
+  if (bmi < 28) return 'fat'
+  return 'obese'
 })
 
 // 页面跳转
@@ -365,11 +445,6 @@ onLoad(() => {
 
 // 每次显示时刷新
 onShow(() => {
-  if (typeof uni.getTabBar === 'function' && uni.getTabBar()) {
-    uni.getTabBar().setData({
-      selected: 0
-    })
-  }
   loadData()
 })
 </script>
@@ -538,93 +613,225 @@ onShow(() => {
   }
 }
 
-.health-hero-card {
+.health-dashboard {
   margin: 0 20px 24px;
-  background: #0071e3;
-  border-radius: 24px;
-  padding: 30px 24px;
-  color: #FFFFFF;
-  box-shadow: 0 10px 30px rgba(0, 113, 227, 0.25);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    transform: scale(2);
-  }
-  
-  .score-circle {
-    width: 120px;
-    height: 120px;
-    position: relative;
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+
+  .dashboard-header {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 24px;
-    
-    .score-inner {
+
+    .header-left {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      z-index: 2;
       
-      .score-val {
-        font-size: 36px;
-        font-weight: 800;
-        line-height: 1;
+      .title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1D1D1F;
+        line-height: 1.2;
+        margin-bottom: 2px;
       }
       
-      .score-label {
+      .subtitle {
         font-size: 12px;
-        opacity: 0.8;
-        margin-top: 4px;
+        color: #86868B;
       }
     }
-    
-    .progress-ring {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      
+      text {
+        font-size: 13px;
+        color: #86868B;
+      }
     }
   }
-  
-  .hero-stats {
+
+  .dashboard-content {
     display: flex;
-    width: 100%;
-    justify-content: space-around;
+    gap: 24px;
+  }
+
+  .bmi-card {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     
-    .stat-item {
-      text-align: center;
-      
-      .stat-val {
-        font-size: 24px;
-        font-weight: 700;
-        display: block;
-        margin-bottom: 4px;
+    .ring-container {
+      width: 100px;
+      height: 100px;
+      position: relative;
+      margin-bottom: 12px;
+
+      .bmi-ring {
+        width: 100%;
+        height: 100%;
+        // transform: rotate(-90deg); // Moved to HTML SVG transform
       }
-      
-      .stat-key {
-        font-size: 12px;
-        opacity: 0.7;
+
+      .ring-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .bmi-val {
+          font-size: 24px;
+          font-weight: 700;
+          color: #1D1D1F;
+          line-height: 1;
+          letter-spacing: -0.5px;
+        }
+
+        .bmi-label {
+          font-size: 11px;
+          color: #86868B;
+          margin-top: 2px;
+          font-weight: 500;
+        }
       }
     }
-    
-    .divider {
-      width: 1px;
-      height: 24px;
-      background: rgba(255,255,255,0.2);
+
+    .bmi-status {
+      background: #F5F5F7;
+      padding: 4px 12px;
+      border-radius: 12px;
+
+      .status-text {
+        font-size: 12px;
+        font-weight: 600;
+        
+        &.thin { color: #FF9500; }
+        &.normal { color: #34C759; }
+        &.fat { color: #FF9500; }
+        &.obese { color: #FF3B30; }
+        &.unknown { color: #86868B; }
+      }
+    }
+  }
+
+  .stats-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+
+    .body-row {
+      display: flex;
+      align-items: center;
+      background: #F5F5F7;
+      border-radius: 16px;
+      padding: 12px 16px;
+      
+      .stat-box {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .label {
+          font-size: 11px;
+          color: #86868B;
+          margin-bottom: 4px;
+        }
+
+        .value-group {
+          display: flex;
+          align-items: baseline;
+          gap: 2px;
+
+          .val {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1D1D1F;
+          }
+
+          .unit {
+            font-size: 11px;
+            color: #86868B;
+          }
+        }
+      }
+
+      .divider-v {
+        width: 1px;
+        height: 20px;
+        background: rgba(0,0,0,0.06);
+        margin: 0 12px;
+      }
+    }
+
+    .activity-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 4px 0;
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .icon-circle {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &.sport { background: rgba(0, 113, 227, 0.1); }
+          &.fire { background: rgba(255, 59, 48, 0.1); }
+        }
+
+        .info {
+          flex: 1;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 0.5px solid rgba(0,0,0,0.05);
+          padding-bottom: 8px;
+
+          .label {
+            font-size: 13px;
+            color: #1D1D1F;
+            font-weight: 500;
+          }
+
+          .val {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1D1D1F;
+            font-family: "SF Pro Rounded", sans-serif;
+
+            .unit {
+              font-size: 11px;
+              color: #86868B;
+              margin-left: 2px;
+              font-weight: 400;
+            }
+          }
+        }
+        
+        &:last-child .info {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+      }
     }
   }
 }
