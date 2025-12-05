@@ -294,3 +294,7 @@ async def _update_goal_progress(goal: SportGoal, user_id: int, db: AsyncSession)
 
 
 
+
+
+
+
